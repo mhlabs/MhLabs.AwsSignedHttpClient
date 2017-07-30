@@ -1,11 +1,11 @@
-﻿using Amazon;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Amazon;
+using Newtonsoft.Json;
 
-namespace signed_request_test.Http
+namespace MhLabs.AwsSignedHttpClient
 {
 
     public class AwsHttpClient : HttpClient

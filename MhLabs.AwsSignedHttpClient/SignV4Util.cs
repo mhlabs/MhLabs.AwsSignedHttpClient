@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using signed_request_test.Http.Credentials;
 
-namespace signed_request_test.Http
+namespace MhLabs.AwsSignedHttpClient
 {
     internal static class SignV4Util
     {
@@ -86,7 +84,7 @@ namespace signed_request_test.Http
                 let headerValues = string.Join(",",
                     request.Headers
                         .GetValues(key.Key) ?? Enumerable.Empty<string>()
-                        .Select(v => v.Trimall())
+                        .Select(v => v.TrimAll())
                 )
                 select new { headerName, headerValues };
             var result = q.ToDictionary(v => v.headerName, v => v.headerValues);

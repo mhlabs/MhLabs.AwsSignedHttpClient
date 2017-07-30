@@ -18,7 +18,7 @@ namespace signed_request_test.Http.Credentials
                 throw new Exception("Unable to retrieve credentials.");
             }
             var regionService = ExtractRegionAndService(request.RequestUri);
-            SignV4Util.SignRequest(request, body, credentials, regionService.Item1, regionService.Item2);
+            MhLabs.AwsSignedHttpClient.SignV4Util.SignRequest(request, body, credentials, regionService.Item1, regionService.Item2);
         }
 
         static readonly Regex _regionRegex = new Regex(@"\.([\w-]+)\.([\w-]+)\.amazonaws\.com$", RegexOptions.Compiled);

@@ -1,11 +1,11 @@
-﻿using Amazon;
-using signed_request_test.Http.Credentials;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Amazon;
+using signed_request_test.Http.Credentials;
 
-namespace signed_request_test.Http
+namespace MhLabs.AwsSignedHttpClient
 {
     public class AwsSignedHttpMessageHandler : HttpClientHandler
     {

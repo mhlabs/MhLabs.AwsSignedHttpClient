@@ -19,9 +19,10 @@ namespace MhLabs.AwsSignedHttpClient
         {
         }
 
-        public async Task<TReturn> SendAsync<TReturn>(HttpMethod method, string requestUri, object postData = null) where TReturn : class
+        public async Task<TReturn> SendAsync<TReturn>(HttpMethod method, string path, object postData = null) where TReturn : class
         {
-            using (var request = new HttpRequestMessage(method, BaseAddress + requestUri))
+            path = path.TrimStart('/');
+            using (var request = new HttpRequestMessage(method, BaseAddress + path))
             {
                 if (method == HttpMethod.Post)
                 {

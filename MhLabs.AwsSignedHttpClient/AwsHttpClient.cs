@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 
 namespace MhLabs.AwsSignedHttpClient
 {
-
     public class AwsHttpClient : HttpClient
     {
         public AwsHttpClient(ClientConfiguration config) : base(new AwsSignedHttpMessageHandler(RegionEndpoint.EUWest1))
@@ -15,32 +14,28 @@ namespace MhLabs.AwsSignedHttpClient
             BaseAddress = config.BaseUri;
         }
 
-        public AwsHttpClient(RegionEndpoint region, string baseUri) : this(new ClientConfiguration {BaseUri = new Uri(baseUri), Region = region})
+        public AwsHttpClient(RegionEndpoint region, string baseUri) : this(
+            new ClientConfiguration {BaseUri = new Uri(baseUri), Region = region})
         {
         }
 
-        public async Task<TReturn> SendAsync<TReturn>(HttpMethod method, string path, object postData = null) where TReturn : class
+        public async Task<TReturn> SendAsync<TReturn>(HttpMethod method, string path, object postData = null)
+            where TReturn : class
         {
             path = path.TrimStart('/');
             using (var request = new HttpRequestMessage(method, BaseAddress + path))
             {
                 if (method == HttpMethod.Post)
-                {
-                    request.Content = new StringContent(JsonConvert.SerializeObject(postData), Encoding.UTF8);
-                }
+                    request.Content = new StringContent(JsonConvert.SerializeObject(postData), Encoding.UTF8,
+                        "application/json");
                 var result = await SendAsync(request);
                 var response = await result.Content.ReadAsStringAsync();
-                
-                if (typeof(TReturn) == typeof(string))
-                {
-                    return response as TReturn;
-                }
-                return JsonConvert.DeserializeObject<TReturn>(response);
 
+                if (typeof(TReturn) == typeof(string))
+                    return response as TReturn;
+                return JsonConvert.DeserializeObject<TReturn>(response);
             }
         }
-
-
     }
 
     public class ClientConfiguration

@@ -2,26 +2,25 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace signed_request_test.Http.Credentials
+namespace MhLabs.AwsSignedHttpClient.Credentials
 {
     public class CredentialChainProvider : ICredentialsProvider
     {
-        public static ICredentialsProvider Default { get; } = new CredentialChainProvider(
-            new EnvironmentVariableCredentialsProvider()
-
-        );
+        private readonly ICredentialsProvider[] _credentialChain;
 
         public CredentialChainProvider(params ICredentialsProvider[] credentialProviders)
-            : this((IEnumerable<ICredentialsProvider>)credentialProviders)
+            : this((IEnumerable<ICredentialsProvider>) credentialProviders)
         {
         }
-
-        readonly ICredentialsProvider[] _credentialChain;
 
         public CredentialChainProvider(IEnumerable<ICredentialsProvider> credentialProviders)
         {
             _credentialChain = credentialProviders.ToArray();
         }
+
+        public static ICredentialsProvider Default { get; } = new CredentialChainProvider(
+            new EnvironmentVariableCredentialsProvider()
+        );
 
         public AwsCredentials GetCredentials()
         {

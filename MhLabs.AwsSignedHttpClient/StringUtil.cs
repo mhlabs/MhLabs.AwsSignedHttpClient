@@ -16,7 +16,7 @@ namespace MhLabs.AwsSignedHttpClient
                 {
                     var next = reader.Peek();
                     if (next < 0) break;
-                    var c = (char)next;
+                    var c = (char) next;
                     if (c == '"')
                     {
                         ReadQuotedString(output, reader);
@@ -27,7 +27,7 @@ namespace MhLabs.AwsSignedHttpClient
                         ReadWhitespace(output, reader);
                         continue;
                     }
-                    output.Append((char)reader.Read());
+                    output.Append((char) reader.Read());
                 }
             }
             return output.ToString();
@@ -38,12 +38,12 @@ namespace MhLabs.AwsSignedHttpClient
             var start = reader.Read();
             Debug.Assert(start == '"');
             output.Append('"');
-            bool escape = false;
+            var escape = false;
             while (true)
             {
                 var next = reader.Read();
                 if (next < 0) break;
-                var c = (char)next;
+                var c = (char) next;
                 output.Append(c);
                 if (escape)
                 {
@@ -59,13 +59,13 @@ namespace MhLabs.AwsSignedHttpClient
 
         private static void ReadWhitespace(StringBuilder output, StringReader reader)
         {
-            var lastWhitespace = (char)reader.Read();
+            var lastWhitespace = (char) reader.Read();
             Debug.Assert(char.IsWhiteSpace(lastWhitespace));
             while (true)
             {
                 var next = reader.Peek();
                 if (next < 0) break;
-                var c = (char)next;
+                var c = (char) next;
                 if (!char.IsWhiteSpace(c)) break;
                 lastWhitespace = c;
                 reader.Read();

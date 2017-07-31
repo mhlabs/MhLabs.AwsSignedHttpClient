@@ -1,4 +1,4 @@
-﻿namespace signed_request_test.Http.Credentials
+﻿namespace MhLabs.AwsSignedHttpClient.Credentials
 {
     public interface ICredentialsProvider
     {

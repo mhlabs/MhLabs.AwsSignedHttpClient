@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace signed_request_test.Http.Credentials
+namespace MhLabs.AwsSignedHttpClient.Credentials
 {
     internal class CredentialCache
     {
-        readonly object _syncRoot = new object();
-        readonly Func<AwsCredentials> _producer;
-        readonly TimeSpan _ttl;
-        CachedValue _value;
+        private readonly Func<AwsCredentials> _producer;
+        private readonly object _syncRoot = new object();
+        private readonly TimeSpan _ttl;
+        private CachedValue _value;
 
         public CredentialCache(Func<AwsCredentials> producer, TimeSpan ttl)
         {
@@ -28,7 +28,7 @@ namespace signed_request_test.Http.Credentials
                     _value = new CachedValue
                     {
                         Value = _producer(),
-                        ValidUntil = DateTime.UtcNow + _ttl,
+                        ValidUntil = DateTime.UtcNow + _ttl
                     };
                     return _value.Value;
                 }
@@ -37,8 +37,8 @@ namespace signed_request_test.Http.Credentials
 
         private class CachedValue
         {
-            public AwsCredentials Value;
             public DateTime ValidUntil;
+            public AwsCredentials Value;
         }
     }
 }

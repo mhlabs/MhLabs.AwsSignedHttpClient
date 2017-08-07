@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +30,12 @@ namespace MhLabs.AwsSignedHttpClient
                     request.Content = new StringContent(JsonConvert.SerializeObject(postData), Encoding.UTF8,
                         "application/json");
                 var result = await SendAsync(request);
+                if (!result.IsSuccessStatusCode)
+                {
+                    if (result.StatusCode == HttpStatusCode.Forbidden)
+                        throw new UnauthorizedAccessException("Unauthorized");
+                }
+
                 var response = await result.Content.ReadAsStringAsync();
 
                 if (typeof(TReturn) == typeof(string))

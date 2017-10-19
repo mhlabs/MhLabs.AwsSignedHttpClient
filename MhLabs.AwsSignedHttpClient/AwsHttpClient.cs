@@ -20,15 +20,18 @@ namespace MhLabs.AwsSignedHttpClient
         {
         }
 
-        public async Task<TReturn> SendAsync<TReturn>(HttpMethod method, string path, object postData = null)
+        public async Task<TReturn> SendAsync<TReturn>(HttpMethod method, string path, object postData = null, string contentType="application/json")
             where TReturn : class
         {
             path = path.TrimStart('/');
             using (var request = new HttpRequestMessage(method, BaseAddress + path))
             {
                 if (method == HttpMethod.Post)
-                    request.Content = new StringContent(JsonConvert.SerializeObject(postData), Encoding.UTF8,
-                        "application/json");
+                {
+                    var data = postData as HttpContent;
+                    request.Content = data ?? new StringContent(postData is string ? postData.ToString() : JsonConvert.SerializeObject(postData), Encoding.UTF8,
+                                          contentType);
+                }
                 var result = await SendAsync(request);
                 if (!result.IsSuccessStatusCode)
                 {

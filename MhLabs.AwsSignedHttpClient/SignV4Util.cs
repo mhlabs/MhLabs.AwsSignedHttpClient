@@ -179,18 +179,18 @@ namespace MhLabs.AwsSignedHttpClient
         {
             if (string.IsNullOrWhiteSpace(uri.Query)) return string.Empty;
             var queryParams = ParseQueryString(uri.Query);
-            var q = from string key in queryParams
-                orderby key
-                from value in queryParams[key]
-                select new {key, value};
+            //var q = from string key in queryParams
+            //    orderby key
+            //    from value in queryParams[key]
+            //    select new {key, value};
 
             var output = new StringBuilder();
-            foreach (var param in q)
+            foreach (var param in queryParams)
             {
                 if (output.Length > 0) output.Append('&');
-                output.WriteEncoded(param.key);
+                output.WriteEncoded(param.Key);
                 output.Append('=');
-                output.WriteEncoded(param.value.ToString());
+                output.WriteEncoded(param.Value);
             }
             return output.ToString();
         }

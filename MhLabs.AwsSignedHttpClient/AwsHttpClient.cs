@@ -26,7 +26,7 @@ namespace MhLabs.AwsSignedHttpClient
             path = path.TrimStart('/');
             using (var request = new HttpRequestMessage(method, BaseAddress + path))
             {
-                if (method == HttpMethod.Post)
+                if (method == HttpMethod.Post || method == HttpMethod.Put)
                 {
                     var data = postData as HttpContent;
                     request.Content = data ?? new StringContent(postData is string ? postData.ToString() : JsonConvert.SerializeObject(postData), Encoding.UTF8,

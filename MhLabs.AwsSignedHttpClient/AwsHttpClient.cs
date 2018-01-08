@@ -37,7 +37,9 @@ namespace MhLabs.AwsSignedHttpClient
 
                 if (!result.IsSuccessStatusCode)
                 {
-                    Console.WriteLine(response);
+                    Console.WriteLine("result.StatusCode: " + result.StatusCode);
+                    Console.WriteLine("result.Content: " + response);
+
                     if (result.StatusCode == HttpStatusCode.Forbidden)
                         throw new UnauthorizedAccessException("Unauthorized");
                 }

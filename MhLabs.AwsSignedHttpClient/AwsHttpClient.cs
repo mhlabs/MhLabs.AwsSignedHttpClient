@@ -33,13 +33,14 @@ namespace MhLabs.AwsSignedHttpClient
                                           contentType);
                 }
                 var result = await SendAsync(request);
+                var response = await result.Content.ReadAsStringAsync();
+
                 if (!result.IsSuccessStatusCode)
                 {
+                    Console.WriteLine(response);
                     if (result.StatusCode == HttpStatusCode.Forbidden)
                         throw new UnauthorizedAccessException("Unauthorized");
                 }
-
-                var response = await result.Content.ReadAsStringAsync();
 
                 if (typeof(TReturn) == typeof(string))
                     return response as TReturn;

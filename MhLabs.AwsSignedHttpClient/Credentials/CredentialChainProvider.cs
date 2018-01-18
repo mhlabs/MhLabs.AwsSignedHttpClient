@@ -27,9 +27,10 @@ namespace MhLabs.AwsSignedHttpClient.Credentials
             foreach (var provider in _credentialChain)
             {
                 var creds = provider.GetCredentials();
-                Console.WriteLine(creds.GetType().Name);
+
                 if (creds != null)
                 {
+                    Console.WriteLine(creds.GetType().Name);
                     Console.WriteLine(creds.AccessKey);
                     Console.WriteLine(creds.SecretKey);
                     Console.WriteLine(creds.Token);

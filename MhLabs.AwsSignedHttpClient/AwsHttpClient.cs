@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -10,17 +11,23 @@ namespace MhLabs.AwsSignedHttpClient
 {
     public class AwsHttpClient : HttpClient
     {
-        public AwsHttpClient(ClientConfiguration config) : base(new AwsSignedHttpMessageHandler(RegionEndpoint.EUWest1))
+        public AwsHttpClient(ClientConfiguration config) : base(new AwsSignedHttpMessageHandler(RegionEndpoint.GetBySystemName(Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION")), 
+            overrideSubSegmentNameFunc:message =>
+            {
+                Console.WriteLine("PathAndQuery: " + message.RequestUri.PathAndQuery);
+                return message.RequestUri.PathAndQuery?.Split('/').FirstOrDefault(p=>!string.IsNullOrEmpty(p));
+            }))
         {
             BaseAddress = config.BaseUri;
         }
 
         public AwsHttpClient(RegionEndpoint region, string baseUri) : this(
-            new ClientConfiguration {BaseUri = new Uri(baseUri), Region = region})
+            new ClientConfiguration { BaseUri = new Uri(baseUri), Region = region })
         {
         }
 
-        public async Task<TReturn> SendAsync<TReturn>(HttpMethod method, string path, object postData = null, string contentType="application/json")
+        public async Task<TReturn> SendAsync<TReturn>(HttpMethod method, string path, object postData = null,
+            string contentType = "application/json")
             where TReturn : class
         {
             path = path.TrimStart('/');
@@ -29,10 +36,15 @@ namespace MhLabs.AwsSignedHttpClient
                 if (method == HttpMethod.Post || method == HttpMethod.Put)
                 {
                     var data = postData as HttpContent;
-                    request.Content = data ?? new StringContent(postData is string ? postData.ToString() : JsonConvert.SerializeObject(postData), Encoding.UTF8,
+                    request.Content = data ?? new StringContent(
+                                          postData is string
+                                              ? postData.ToString()
+                                              : JsonConvert.SerializeObject(postData), Encoding.UTF8,
                                           contentType);
                 }
-                var result = await SendAsync(request);
+                
+                var result = await this.SendAsync(request);
+
                 var response = await result.Content.ReadAsStringAsync();
 
                 if (!result.IsSuccessStatusCode)
@@ -49,11 +61,13 @@ namespace MhLabs.AwsSignedHttpClient
                 return JsonConvert.DeserializeObject<TReturn>(response);
             }
         }
-    }
 
-    public class ClientConfiguration
-    {
-        public RegionEndpoint Region { get; set; }
-        public Uri BaseUri { get; set; }
-    }
+
+}
+
+public class ClientConfiguration
+{
+    public RegionEndpoint Region { get; set; }
+    public Uri BaseUri { get; set; }
+}
 }

@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace MhLabs.AwsSignedHttpClient
 {
-    internal static class SignV4Util
+    public static class SignV4Util
     {
         private static readonly char[] _datePartSplitChars = {'T'};
 
@@ -45,6 +45,7 @@ namespace MhLabs.AwsSignedHttpClient
             request.Headers.TryAddWithoutValidation("Authorization", auth);
             if (!string.IsNullOrWhiteSpace(credentials.Token))
                 request.Headers.Add("X-Amz-Security-Token", credentials.Token);
+
         }
 
         public static byte[] GetSigningKey(string secretKey, string dateStamp, string region, string service)

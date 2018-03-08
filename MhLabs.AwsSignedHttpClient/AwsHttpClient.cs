@@ -26,6 +26,10 @@ namespace MhLabs.AwsSignedHttpClient
         {
         }
 
+        public AwsHttpClient(HttpMessageHandler handler) : base(handler)
+        {
+        }
+
         public async Task<TReturn> SendAsync<TReturn>(HttpMethod method, string path, object postData = null,
             string contentType = "application/json")
             where TReturn : class

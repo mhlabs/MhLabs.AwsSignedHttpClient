@@ -5,12 +5,15 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Amazon;
+using Amazon.Runtime;
 using Newtonsoft.Json;
 
 namespace MhLabs.AwsSignedHttpClient
 {
-    public class AwsHttpClient : HttpClient
+    public class AwsHttpClient : HttpClient, IAmazonService
     {
+        public IClientConfig Config => throw new NotImplementedException();
+
         public AwsHttpClient(ClientConfiguration config) : base(new AwsSignedHttpMessageHandler(RegionEndpoint.GetBySystemName(Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION")), 
             overrideSubSegmentNameFunc:message =>
             {

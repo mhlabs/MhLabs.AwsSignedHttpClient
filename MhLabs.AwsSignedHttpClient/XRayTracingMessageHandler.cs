@@ -38,7 +38,10 @@ namespace MhLabs.AWSXRayHttpClientHandler2
             }
             catch (Exception ex)
             {
-                AWSXRayRecorder.Instance.AddException(ex);
+                if (!AWSXRayRecorder.Instance.IsTracingDisabled())
+                {
+                    AWSXRayRecorder.Instance.AddException(ex);
+                }
                 if (ex is HttpRequestException)
                 {
                     HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
@@ -48,7 +51,10 @@ namespace MhLabs.AWSXRayHttpClientHandler2
             }
             finally
             {
-                AWSXRayRecorder.Instance.EndSubsegment();
+                if (!AWSXRayRecorder.Instance.IsTracingDisabled())
+                {
+                    AWSXRayRecorder.Instance.EndSubsegment();
+                }
             }
             return webResponse;
         }

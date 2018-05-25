@@ -30,7 +30,7 @@ namespace MhLabs.AwsSignedHttpClient
 
         private async Task SignRequest(HttpRequestMessage request)
         {
-            var body = (request.Method == HttpMethod.Post || request.Method == HttpMethod.Put) ? await request.Content.ReadAsByteArrayAsync() : null;
+            var body = (request.Method == HttpMethod.Post || request.Method == HttpMethod.Put || request.Method == HttpMethod.Delete) ? await request.Content.ReadAsByteArrayAsync() : null;
             var credentials = _credentialsProvider.GetCredentials();
             if (credentials == null)
                 throw new Exception("Unable to retrieve credentials required to sign the request.");

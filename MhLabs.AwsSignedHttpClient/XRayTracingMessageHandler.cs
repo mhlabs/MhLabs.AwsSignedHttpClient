@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -80,8 +81,8 @@ namespace MhLabs.AWSXRayHttpClientHandler2
 
         private void ProcessRequest(HttpRequestMessage request)
         {
-            Console.WriteLine("IsTracingDisabled() = " + AWSXRayRecorder.Instance.IsTracingDisabled());
-            Console.WriteLine("Subsegment name = " + _overrideSubSegmentNameFunc?.Invoke(request));
+            Debug.WriteLine("IsTracingDisabled() = " + AWSXRayRecorder.Instance.IsTracingDisabled());
+            Debug.WriteLine("Subsegment name = " + _overrideSubSegmentNameFunc?.Invoke(request));
             if (!AWSXRayRecorder.Instance.IsTracingDisabled())
             {
                 AWSXRayRecorder.Instance.BeginSubsegment(_overrideSubSegmentNameFunc?.Invoke(request) != null ? _overrideSubSegmentNameFunc(request) : request.RequestUri.Host);

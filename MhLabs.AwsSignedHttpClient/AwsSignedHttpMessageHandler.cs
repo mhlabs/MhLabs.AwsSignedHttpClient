@@ -10,13 +10,12 @@ namespace MhLabs.AwsSignedHttpClient
 {
     public class AwsSignedHttpMessageHandler : XRayTracingMessageHandler
     {
-        private readonly ICredentialsProvider _credentialsProvider;
         private readonly string _region;
+        private readonly ICredentialsProvider _credentialsProvider;
 
-        public AwsSignedHttpMessageHandler(RegionEndpoint region, ICredentialsProvider credentialsProvider = null, Func<HttpRequestMessage, string> overrideSubSegmentNameFunc = null) : base (overrideSubSegmentNameFunc)
+        public AwsSignedHttpMessageHandler(ICredentialsProvider credentialsProvider = null, Func<HttpRequestMessage, string> overrideSubSegmentNameFunc = null) : base (overrideSubSegmentNameFunc)
         {
-            if (region == null) throw new ArgumentNullException(nameof(region));
-            _region = region.SystemName.ToLowerInvariant();
+            _region = Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION")?.ToLower();
             _credentialsProvider = credentialsProvider ?? CredentialChainProvider.Default;
         }
 

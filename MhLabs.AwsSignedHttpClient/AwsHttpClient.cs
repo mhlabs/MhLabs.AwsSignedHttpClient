@@ -14,23 +14,13 @@ namespace MhLabs.AwsSignedHttpClient
     {
         public IClientConfig Config => throw new NotImplementedException();
 
-        public AwsHttpClient(ClientConfiguration config) : base(new AwsSignedHttpMessageHandler(RegionEndpoint.GetBySystemName(Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION")), 
-            overrideSubSegmentNameFunc:message =>
+        public AwsHttpClient(string baseUrl = null) : base(new AwsSignedHttpMessageHandler(overrideSubSegmentNameFunc:message =>
             {
                 Console.WriteLine("PathAndQuery: " + message.RequestUri.PathAndQuery);
                 return message.RequestUri.PathAndQuery?.Split('/').FirstOrDefault(p=>!string.IsNullOrEmpty(p));
             }))
         {
-            BaseAddress = config.BaseUri;
-        }
-
-        public AwsHttpClient(RegionEndpoint region, string baseUri) : this(
-            new ClientConfiguration { BaseUri = new Uri(baseUri), Region = region })
-        {
-        }
-
-        public AwsHttpClient(HttpMessageHandler handler) : base(handler)
-        {
+            BaseAddress = new Uri(baseUrl ?? Environment.GetEnvironmentVariable("ApiBaseUrl") ?? Environment.GetEnvironmentVariable("ApiGatewayBaseUrl"));
         }
 
         public async Task<TReturn> SendAsync<TReturn>(HttpMethod method, string path, object postData = null,
@@ -72,9 +62,4 @@ namespace MhLabs.AwsSignedHttpClient
 
 }
 
-public class ClientConfiguration
-{
-    public RegionEndpoint Region { get; set; }
-    public Uri BaseUri { get; set; }
-}
 }

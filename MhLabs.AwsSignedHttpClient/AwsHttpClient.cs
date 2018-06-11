@@ -10,15 +10,15 @@ using Newtonsoft.Json;
 
 namespace MhLabs.AwsSignedHttpClient
 {
-    public class AwsHttpClient : HttpClient, IAmazonService
+    public class AwsHttpClient : HttpClient, IAmazonService, IAwsHttpClient
     {
         public IClientConfig Config => throw new NotImplementedException();
 
-        public AwsHttpClient(string baseUrl = null) : base(new AwsSignedHttpMessageHandler(overrideSubSegmentNameFunc:message =>
-            {
-                Console.WriteLine("PathAndQuery: " + message.RequestUri.PathAndQuery);
-                return message.RequestUri.PathAndQuery?.Split('/').FirstOrDefault(p=>!string.IsNullOrEmpty(p));
-            }))
+        public AwsHttpClient(string baseUrl = null) : base(new AwsSignedHttpMessageHandler(overrideSubSegmentNameFunc: message =>
+             {
+                 Console.WriteLine("PathAndQuery: " + message.RequestUri.PathAndQuery);
+                 return message.RequestUri.PathAndQuery?.Split('/').FirstOrDefault(p => !string.IsNullOrEmpty(p));
+             }))
         {
             BaseAddress = new Uri(baseUrl ?? Environment.GetEnvironmentVariable("ApiBaseUrl") ?? Environment.GetEnvironmentVariable("ApiGatewayBaseUrl"));
         }
@@ -39,7 +39,7 @@ namespace MhLabs.AwsSignedHttpClient
                                               : JsonConvert.SerializeObject(postData), Encoding.UTF8,
                                           contentType);
                 }
-                
+
                 var result = await this.SendAsync(request);
 
                 var response = await result.Content.ReadAsStringAsync();
@@ -60,6 +60,6 @@ namespace MhLabs.AwsSignedHttpClient
         }
 
 
-}
+    }
 
 }

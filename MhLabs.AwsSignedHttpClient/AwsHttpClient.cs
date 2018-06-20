@@ -14,7 +14,7 @@ namespace MhLabs.AwsSignedHttpClient
     {
         public IClientConfig Config => throw new NotImplementedException();
 
-        public AwsHttpClient(string baseUrl = null) : base(new AwsSignedHttpMessageHandler(overrideSubSegmentNameFunc: message =>
+        public AwsHttpClient(string baseUrl = null, HttpMessageHandler messageHandler = null) : base(messageHandler ?? new AwsSignedHttpMessageHandler(overrideSubSegmentNameFunc: message =>
              {
                  Console.WriteLine("PathAndQuery: " + message.RequestUri.PathAndQuery);
                  return message.RequestUri.PathAndQuery?.Split('/').FirstOrDefault(p => !string.IsNullOrEmpty(p));

@@ -14,9 +14,10 @@ namespace MhLabs.AwsSignedHttpClient
 {
     public static class SignV4Util
     {
-        private static readonly char[] _datePartSplitChars = {'T'};
+        private static readonly char[] _datePartSplitChars = { 'T' };
 
         private static readonly byte[] _emptyBytes = new byte[0];
+        public static bool DebugLogging { get; set; }
 
         private static readonly UTF8Encoding _encoding = new UTF8Encoding(false);
 
@@ -30,8 +31,11 @@ namespace MhLabs.AwsSignedHttpClient
 
             var signingKey = GetSigningKey(credentials.SecretKey, dateStamp, region, service);
             var stringToSign = GetStringToSign(request, body, region, service);
-            Debug.Write("========== String to Sign ==========\r\n{0}\r\n========== String to Sign ==========\r\n",
-                stringToSign);
+            if (DebugLogging)
+            {
+                Debug.Write("========== String to Sign ==========\r\n{0}\r\n========== String to Sign ==========\r\n",
+                    stringToSign);
+            }
             var signature = signingKey.GetHmacSha256Hash(stringToSign).ToLowercaseHex();
             var auth = string.Format(
                 "AWS4-HMAC-SHA256 Credential={0}/{1}, SignedHeaders={2}, Signature={3}",
@@ -39,8 +43,10 @@ namespace MhLabs.AwsSignedHttpClient
                 GetCredentialScope(dateStamp, region, service),
                 GetSignedHeaders(request),
                 signature);
-
-            Console.WriteLine(auth);
+            if (DebugLogging)
+            {
+                Console.WriteLine(auth);
+            }
 
             request.Headers.TryAddWithoutValidation("Authorization", auth);
             if (!string.IsNullOrWhiteSpace(credentials.Token))
@@ -90,13 +96,13 @@ namespace MhLabs.AwsSignedHttpClient
         private static Dictionary<string, string> GetCanonicalHeaders(this HttpRequestMessage request)
         {
             var q = from KeyValuePair<string, IEnumerable<string>> key in request.Headers
-                let headerName = key.Key.ToLowerInvariant()
-                let headerValues = string.Join(",",
-                    request.Headers
-                        .GetValues(key.Key) ?? Enumerable.Empty<string>()
-                        .Select(v => v.TrimAll())
-                )
-                select new {headerName, headerValues};
+                    let headerName = key.Key.ToLowerInvariant()
+                    let headerValues = string.Join(",",
+                        request.Headers
+                            .GetValues(key.Key) ?? Enumerable.Empty<string>()
+                            .Select(v => v.TrimAll())
+                    )
+                    select new { headerName, headerValues };
             var result = q.ToDictionary(v => v.headerName, v => v.headerValues);
             result["host"] = request.RequestUri.Host.ToLowerInvariant();
             return result;
@@ -141,8 +147,8 @@ namespace MhLabs.AwsSignedHttpClient
         private static void WriteCanonicalHeaders(Dictionary<string, string> canonicalHeaders, StringBuilder output)
         {
             var q = from pair in canonicalHeaders
-                orderby pair.Key
-                select string.Format("{0}:{1}\n", pair.Key, pair.Value);
+                    orderby pair.Key
+                    select string.Format("{0}:{1}\n", pair.Key, pair.Value);
             foreach (var line in q)
                 output.Append(line);
         }

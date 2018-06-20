@@ -9,7 +9,7 @@ namespace MhLabs.AwsSignedHttpClient.Credentials
         private readonly ICredentialsProvider[] _credentialChain;
 
         public CredentialChainProvider(params ICredentialsProvider[] credentialProviders)
-            : this((IEnumerable<ICredentialsProvider>) credentialProviders)
+            : this((IEnumerable<ICredentialsProvider>)credentialProviders)
         {
         }
 
@@ -30,11 +30,13 @@ namespace MhLabs.AwsSignedHttpClient.Credentials
 
                 if (creds != null)
                 {
-                    Console.WriteLine(creds.GetType().Name);
-                    Console.WriteLine(creds.AccessKey);
-                    Console.WriteLine(creds.SecretKey);
-                    Console.WriteLine(creds.Token);
-
+                    if (SignV4Util.DebugLogging)
+                    {
+                        Console.WriteLine(creds.GetType().Name);
+                        Console.WriteLine(creds.AccessKey);
+                        Console.WriteLine(creds.SecretKey);
+                        Console.WriteLine(creds.Token);
+                    }
                     return creds;
                 }
             }

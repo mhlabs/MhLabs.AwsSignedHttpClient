@@ -8,12 +8,12 @@ using MhLabs.AWSXRayHttpClientHandler;
 
 namespace MhLabs.AwsSignedHttpClient
 {
-    public class AwsSignedHttpMessageHandler : XRayTracingMessageHandler
+    public class AwsSignedHttpMessageHandler : DelegatingHandler
     {
         private readonly string _region;
         private readonly ICredentialsProvider _credentialsProvider;
 
-        public AwsSignedHttpMessageHandler(ICredentialsProvider credentialsProvider = null, Func<HttpRequestMessage, string> overrideSubSegmentNameFunc = null) : base (overrideSubSegmentNameFunc)
+        public AwsSignedHttpMessageHandler(ICredentialsProvider credentialsProvider = null) 
         {
             _region = Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION")?.ToLower();
             _credentialsProvider = credentialsProvider ?? CredentialChainProvider.Default;
@@ -21,7 +21,7 @@ namespace MhLabs.AwsSignedHttpClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
-        {
+        {                        
             await SignRequest(request);            
             return await base.SendAsync(request, cancellationToken);
         }

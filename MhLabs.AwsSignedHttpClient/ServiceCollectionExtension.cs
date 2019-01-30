@@ -21,12 +21,12 @@ namespace MhLabs.AwsSignedHttpClient
             var httpClientBuilder = services.AddHttpClient<TClient, TImplementation>(client =>
                 {
                     client.BaseAddress = new Uri(baseUrl ?? Environment.GetEnvironmentVariable("ApiBaseUrl") ?? Environment.GetEnvironmentVariable("ApiGatewayBaseUrl"));
-                });
+                }).AddHttpMessageHandler<AwsSignedHttpMessageHandler>()
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
             if (useCircuitBreaker)
             {
-                httpClientBuilder.AddHttpMessageHandler<AwsSignedHttpMessageHandler>()
-                .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+                httpClientBuilder
                 .AddPolicyHandler(GetRetryPolicy())
                 .AddPolicyHandler(GetCircuitBreakerPolicy());
             }
@@ -39,7 +39,7 @@ namespace MhLabs.AwsSignedHttpClient
                 .HandleTransientHttpError()
                 .CircuitBreakerAsync(3, TimeSpan.FromSeconds(30), (resp, ts) =>
                 {
-                    
+
                 },
                 () => { });
         }

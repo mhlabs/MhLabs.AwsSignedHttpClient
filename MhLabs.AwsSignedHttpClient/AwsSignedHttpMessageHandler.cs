@@ -13,7 +13,7 @@ namespace MhLabs.AwsSignedHttpClient
         private readonly string _region;
         private readonly ICredentialsProvider _credentialsProvider;
 
-        public AwsSignedHttpMessageHandler(ICredentialsProvider credentialsProvider = null) 
+        public AwsSignedHttpMessageHandler(ICredentialsProvider credentialsProvider = null)
         {
             _region = Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION")?.ToLower();
             _credentialsProvider = credentialsProvider ?? CredentialChainProvider.Default;
@@ -21,8 +21,8 @@ namespace MhLabs.AwsSignedHttpClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
-        {                        
-            await SignRequest(request);            
+        {
+            await SignRequest(request);
             return await base.SendAsync(request, cancellationToken);
         }
 

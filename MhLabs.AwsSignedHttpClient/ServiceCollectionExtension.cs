@@ -13,7 +13,8 @@ namespace MhLabs.AwsSignedHttpClient
     {
         private static readonly Random _jitterer = new Random();
 
-        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, string baseUrl = null, bool useCircuitBreaker = true) where TClient : class
+        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, string baseUrl = null, bool useCircuitBreaker = true,
+            RetryLevel retryLevel = RetryLevel.Read) where TClient : class
             where TImplementation : class, TClient
         {
             services.AddTransient<AwsSignedHttpMessageHandler>();
@@ -27,13 +28,28 @@ namespace MhLabs.AwsSignedHttpClient
             if (useCircuitBreaker)
             {
                 httpClientBuilder
-                .AddPolicyHandler(GetRetryPolicy())
-                .AddPolicyHandler(GetCircuitBreakerPolicy());
+                    .AddPolicyHandler(GetCircuitBreakerPolicy());
             }
+
+            if (retryLevel == RetryLevel.Update)
+            {
+                httpClientBuilder
+                    .AddPolicyHandler(GetRetryPolicy());
+            }
+
+            if (retryLevel == RetryLevel.Read)
+            {
+                httpClientBuilder
+                    .AddPolicyHandler(request =>
+                        request.Method == HttpMethod.Get
+                            ? GetRetryPolicy()
+                            : GetNoRetryPolicy());
+            }
+
             return services;
         }
 
-        static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+        private static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
         {
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
@@ -43,9 +59,9 @@ namespace MhLabs.AwsSignedHttpClient
                 },
                 () => { });
         }
-        static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         {
-            return HttpPolicyExtensions
+            var retryPolicy = HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .WaitAndRetryAsync(3,
                             retryAttempt =>
@@ -53,6 +69,15 @@ namespace MhLabs.AwsSignedHttpClient
                                 return TimeSpan.FromMilliseconds(Math.Pow(2, retryAttempt))
                              + TimeSpan.FromMilliseconds(_jitterer.Next(0, 100));
                             });
+
+            return retryPolicy;
         }
+
+        private static IAsyncPolicy<HttpResponseMessage> GetNoRetryPolicy()
+        {
+            var noOpPolicy = Policy.NoOpAsync().AsAsyncPolicy<HttpResponseMessage>();
+            return noOpPolicy;
+        }
+
     }
 }

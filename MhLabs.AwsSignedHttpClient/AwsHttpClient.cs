@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Amazon;
 using Amazon.Runtime;
@@ -20,7 +21,7 @@ namespace MhLabs.AwsSignedHttpClient
         }
 
         public async Task<TReturn> SendAsync<TReturn>(HttpMethod method, string path, object postData = null,
-            string contentType = "application/json")
+            string contentType = "application/json", CancellationToken cancellationToken = default(CancellationToken))
             where TReturn : class
         {
             path = path.TrimStart('/');
@@ -36,7 +37,7 @@ namespace MhLabs.AwsSignedHttpClient
                                           contentType);
                 }
 
-                var result = await this.SendAsync(request);
+                var result = await this.SendAsync(request, cancellationToken);
 
                 var response = await result.Content.ReadAsStringAsync();
 

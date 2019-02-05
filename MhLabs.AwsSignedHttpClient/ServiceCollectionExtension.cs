@@ -13,31 +13,30 @@ namespace MhLabs.AwsSignedHttpClient
     {
         private static readonly Random _jitterer = new Random();
 
-        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, string baseUrl = null, bool useCircuitBreaker = true,
-            RetryLevel retryLevel = RetryLevel.Read) where TClient : class
+        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options) where TClient : class
             where TImplementation : class, TClient
         {
             services.AddTransient<AwsSignedHttpMessageHandler>();
 
             var httpClientBuilder = services.AddHttpClient<TClient, TImplementation>(client =>
                 {
-                    client.BaseAddress = new Uri(baseUrl ?? Environment.GetEnvironmentVariable("ApiBaseUrl") ?? Environment.GetEnvironmentVariable("ApiGatewayBaseUrl"));
+                    client.BaseAddress = new Uri(options.BaseUrl ?? Environment.GetEnvironmentVariable("ApiBaseUrl") ?? Environment.GetEnvironmentVariable("ApiGatewayBaseUrl"));
                 }).AddHttpMessageHandler<AwsSignedHttpMessageHandler>()
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
-            if (useCircuitBreaker)
+            if (options.UseCircuitBreaker)
             {
                 httpClientBuilder
                     .AddPolicyHandler(GetCircuitBreakerPolicy());
             }
 
-            if (retryLevel == RetryLevel.Update)
+            if (options.RetryLevel == RetryLevel.Update)
             {
                 httpClientBuilder
                     .AddPolicyHandler(GetRetryPolicy());
             }
 
-            if (retryLevel == RetryLevel.Read)
+            if (options.RetryLevel == RetryLevel.Read)
             {
                 httpClientBuilder
                     .AddPolicyHandler(request =>
@@ -51,14 +50,17 @@ namespace MhLabs.AwsSignedHttpClient
 
         private static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
         {
-            return HttpPolicyExtensions
+            var circuitBreakerPolicy = HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .CircuitBreakerAsync(3, TimeSpan.FromSeconds(30), (resp, ts) =>
                 {
 
                 },
                 () => { });
+
+            return circuitBreakerPolicy;
         }
+
         private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         {
             var retryPolicy = HttpPolicyExtensions

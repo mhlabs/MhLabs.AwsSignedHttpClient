@@ -13,9 +13,11 @@ namespace MhLabs.AwsSignedHttpClient
     {
         private static readonly Random _jitterer = new Random();
 
-        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options) where TClient : class
+        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
             where TImplementation : class, TClient
         {
+            if (options == null) options = new HttpOptions();
+
             services.AddTransient<AwsSignedHttpMessageHandler>();
 
             var httpClientBuilder = services.AddHttpClient<TClient, TImplementation>(client =>

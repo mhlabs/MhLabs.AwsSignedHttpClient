@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -13,7 +14,7 @@ namespace MhLabs.AwsSignedHttpClient
         private static Uri _baseAddress = new Uri(Environment.GetEnvironmentVariable("ApiBaseUrl") ?? Environment.GetEnvironmentVariable("ApiGatewayBaseUrl"));
 
         public static async Task<TReturn> SendAsync<TReturn>(this HttpClient client, HttpMethod method, string path, object postData = null,
-            string contentType = "application/json")
+            string contentType = "application/json", CancellationToken cancellationToken = default(CancellationToken))
             where TReturn : class
         {
             path = path.TrimStart('/');
@@ -29,7 +30,7 @@ namespace MhLabs.AwsSignedHttpClient
                                           contentType);
                 }
 
-                var result = await client.SendAsync(request);
+                var result = await client.SendAsync(request, cancellationToken);
 
                 var response = await result.Content.ReadAsStringAsync();
 

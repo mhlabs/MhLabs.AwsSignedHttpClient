@@ -11,14 +11,12 @@ namespace MhLabs.AwsSignedHttpClient
     public static class HttpResponseMessageExtension
     {
 
-        private static Uri _baseAddress = new Uri(Environment.GetEnvironmentVariable("ApiBaseUrl") ?? Environment.GetEnvironmentVariable("ApiGatewayBaseUrl"));
-
         public static async Task<TReturn> SendAsync<TReturn>(this HttpClient client, HttpMethod method, string path, object postData = null,
             string contentType = "application/json", CancellationToken cancellationToken = default(CancellationToken))
             where TReturn : class
         {
             path = path.TrimStart('/');
-            using (var request = new HttpRequestMessage(method, _baseAddress + path))
+            using (var request = new HttpRequestMessage(method, client.BaseAddress + path))
             {
                 if (method == HttpMethod.Post || method == HttpMethod.Put || method == HttpMethod.Delete)
                 {

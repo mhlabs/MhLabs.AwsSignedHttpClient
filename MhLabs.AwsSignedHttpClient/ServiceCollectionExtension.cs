@@ -70,8 +70,12 @@ namespace MhLabs.AwsSignedHttpClient
                 .WaitAndRetryAsync(3,
                             retryAttempt =>
                             {
-                                return TimeSpan.FromMilliseconds(Math.Pow(5, retryAttempt))
-                             + TimeSpan.FromMilliseconds(_jitterer.Next(0, 100));
+                                var delay = TimeSpan.FromMilliseconds(Math.Pow(5, retryAttempt))
+                                    + TimeSpan.FromMilliseconds(_jitterer.Next(0, 100));
+
+                                Console.WriteLine($"AwsSignedHttpClient - Retrying call, attempt: {retryAttempt}, delay ms: {delay.TotalMilliseconds}");
+
+                                return delay;
                             });
 
             return retryPolicy;

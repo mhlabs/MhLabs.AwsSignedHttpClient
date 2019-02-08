@@ -26,12 +26,6 @@ namespace MhLabs.AwsSignedHttpClient
                 }).AddHttpMessageHandler<AwsSignedHttpMessageHandler>()
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
-            if (options.UseCircuitBreaker)
-            {
-                httpClientBuilder
-                    .AddPolicyHandler(GetCircuitBreakerPolicy());
-            }
-
             if (options.RetryLevel == RetryLevel.Update)
             {
                 httpClientBuilder
@@ -45,6 +39,12 @@ namespace MhLabs.AwsSignedHttpClient
                         request.Method == HttpMethod.Get
                             ? GetRetryPolicy()
                             : GetNoRetryPolicy());
+            }
+
+            if (options.UseCircuitBreaker)
+            {
+                httpClientBuilder
+                    .AddPolicyHandler(GetCircuitBreakerPolicy());
             }
 
             return services;

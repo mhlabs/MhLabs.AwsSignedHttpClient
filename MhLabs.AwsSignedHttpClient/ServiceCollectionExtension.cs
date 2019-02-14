@@ -6,6 +6,7 @@ using Polly.Extensions.Http;
 using Microsoft.Extensions.Http;
 using System.Linq;
 using System.Threading;
+using System.IO;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -54,6 +55,7 @@ namespace MhLabs.AwsSignedHttpClient
         {
             var circuitBreakerPolicy = HttpPolicyExtensions
                 .HandleTransientHttpError()
+                .Or<IOException>()
                 .CircuitBreakerAsync(3, TimeSpan.FromSeconds(30), (resp, ts) =>
                 {
 
@@ -67,6 +69,7 @@ namespace MhLabs.AwsSignedHttpClient
         {
             var retryPolicy = HttpPolicyExtensions
                 .HandleTransientHttpError()
+                .Or<IOException>()
                 .WaitAndRetryAsync(3,
                             retryAttempt =>
                             {

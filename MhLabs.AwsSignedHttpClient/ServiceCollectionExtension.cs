@@ -7,6 +7,7 @@ using Microsoft.Extensions.Http;
 using System.Linq;
 using System.Threading;
 using System.IO;
+using System.Net.Sockets;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -55,7 +56,7 @@ namespace MhLabs.AwsSignedHttpClient
         {
             var circuitBreakerPolicy = HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .Or<IOException>()
+                .OrInner<IOException>()
                 .CircuitBreakerAsync(3, TimeSpan.FromSeconds(30), (resp, ts) =>
                 {
 
@@ -67,9 +68,10 @@ namespace MhLabs.AwsSignedHttpClient
 
         private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         {
+
             var retryPolicy = HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .Or<IOException>()
+                .OrInner<IOException>()
                 .WaitAndRetryAsync(3,
                             retryAttempt =>
                             {
@@ -77,7 +79,6 @@ namespace MhLabs.AwsSignedHttpClient
                                     + TimeSpan.FromMilliseconds(_jitterer.Next(0, 100));
 
                                 Console.WriteLine($"AwsSignedHttpClient - Retrying call, attempt: {retryAttempt}, delay ms: {delay.TotalMilliseconds}");
-
                                 return delay;
                             });
 

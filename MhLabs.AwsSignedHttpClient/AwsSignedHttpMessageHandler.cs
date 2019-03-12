@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon;
 using MhLabs.AwsSignedHttpClient.Credentials;
-using MhLabs.AWSXRayHttpClientHandler;
 
 namespace MhLabs.AwsSignedHttpClient
 {

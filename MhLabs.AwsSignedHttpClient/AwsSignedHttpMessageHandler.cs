@@ -21,10 +21,17 @@ namespace MhLabs.AwsSignedHttpClient
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            await SignRequest(request);
-            return await base.SendAsync(request, cancellationToken);
-        }
+            Console.WriteLine($"AwsSignedHttpClient - {request.Method}");
+            Console.WriteLine($"AwsSignedHttpClient - {request.RequestUri}");
 
+            await SignRequest(request);
+
+            var response = await base.SendAsync(request, cancellationToken);
+
+            Console.WriteLine($"AwsSignedHttpClient - Response status code: {response?.StatusCode}");
+
+            return response;
+        }
 
         private async Task SignRequest(HttpRequestMessage request)
         {

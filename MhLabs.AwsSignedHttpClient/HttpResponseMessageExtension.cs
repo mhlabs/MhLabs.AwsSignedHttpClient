@@ -28,6 +28,11 @@ namespace MhLabs.AwsSignedHttpClient
                                           contentType);
                 }
 
+                if (!request.Headers.Contains(CorrelationHelper.CorrelationIdHeader))
+                {
+                    request.Headers.Add(CorrelationHelper.CorrelationIdHeader, CorrelationHelper.CorrelationId ?? Guid.NewGuid().ToString());
+                }
+
                 var result = await client.SendAsync(request, cancellationToken);
 
                 var response = await result.Content.ReadAsStringAsync();

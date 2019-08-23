@@ -18,9 +18,21 @@ namespace MhLabs.AwsSignedHttpClient
         public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
             where TImplementation : class, TClient
         {
-            if (options == null) options = new HttpOptions();
-
             services.AddTransient<AwsSignedHttpMessageHandler>();
+
+            return AddMhHttpClient<TClient, TImplementation>(services, options);
+        }
+
+        public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
+            where TImplementation : class, TClient
+        {
+            return AddMhHttpClient<TClient, TImplementation>(services, options);
+        }
+
+        private static IServiceCollection AddMhHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
+            where TImplementation : class, TClient
+        {
+            if (options == null) options = new HttpOptions();
 
             var httpClientBuilder = services.AddHttpClient<TClient, TImplementation>(client =>
                 {

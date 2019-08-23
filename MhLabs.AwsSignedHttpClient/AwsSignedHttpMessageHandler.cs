@@ -7,7 +7,7 @@ using MhLabs.AwsSignedHttpClient.Credentials;
 
 namespace MhLabs.AwsSignedHttpClient
 {
-    public class AwsSignedHttpMessageHandler : DelegatingHandler
+    public class AwsSignedHttpMessageHandler : BaseHttpMessageHandler
     {
         private readonly string _region;
         private readonly ICredentialsProvider _credentialsProvider;
@@ -21,16 +21,9 @@ namespace MhLabs.AwsSignedHttpClient
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            Console.WriteLine($"AwsSignedHttpClient - {request.Method}");
-            Console.WriteLine($"AwsSignedHttpClient - {request.RequestUri}");
-
             await SignRequest(request);
 
-            var response = await base.SendAsync(request, cancellationToken);
-
-            Console.WriteLine($"AwsSignedHttpClient - Response status code: {response?.StatusCode}");
-
-            return response;
+            return await base.SendAsync(request, cancellationToken);
         }
 
         private async Task SignRequest(HttpRequestMessage request)

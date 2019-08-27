@@ -185,11 +185,7 @@ namespace MhLabs.AwsSignedHttpClient
         public static string GetCanonicalQueryString(this Uri uri)
         {
             if (string.IsNullOrWhiteSpace(uri.Query)) return string.Empty;
-            var queryParams = ParseQueryString(uri.Query);
-            //var q = from string key in queryParams
-            //    orderby key
-            //    from value in queryParams[key]
-            //    select new {key, value};
+            var queryParams = ParseQueryString(uri.Query).OrderBy(kvp => kvp.Key); ;
 
             var output = new StringBuilder();
             foreach (var param in queryParams)

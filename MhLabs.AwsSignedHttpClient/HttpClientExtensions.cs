@@ -34,7 +34,7 @@ namespace MhLabs.AwsSignedHttpClient
             path = path.TrimStart('/');
             using (var request = new HttpRequestMessage(method, client.BaseAddress + path))
             {
-                if (method == HttpMethod.Post || method == HttpMethod.Put || method == HttpMethod.Delete)
+                if (method == HttpMethod.Post || method == HttpMethod.Put || method == HttpMethod.Delete || method == new HttpMethod("PATCH"))
                 {
                     var requestData = postData as HttpContent;
                     request.Content = requestData ?? new StringContent(

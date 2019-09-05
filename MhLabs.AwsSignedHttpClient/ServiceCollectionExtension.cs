@@ -3,11 +3,7 @@ using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
-using Microsoft.Extensions.Http;
-using System.Linq;
-using System.Threading;
 using System.IO;
-using System.Net.Sockets;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -36,7 +32,7 @@ namespace MhLabs.AwsSignedHttpClient
 
             var httpClientBuilder = services.AddHttpClient<TClient, TImplementation>(client =>
                 {
-                    client.BaseAddress = new Uri(options.BaseUrl ?? Environment.GetEnvironmentVariable("ApiBaseUrl") ?? Environment.GetEnvironmentVariable("ApiGatewayBaseUrl"));
+                    client.BaseAddress = GetBaseUrl(options);
                 }).AddHttpMessageHandler<AwsSignedHttpMessageHandler>()
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
@@ -62,6 +58,17 @@ namespace MhLabs.AwsSignedHttpClient
             }
 
             return services;
+        }
+
+        private static Uri GetBaseUrl(HttpOptions options)
+        {
+            var baseUrl = options.BaseUrl ?? Environment.GetEnvironmentVariable("ApiBaseUrl") ??
+                          Environment.GetEnvironmentVariable("ApiGatewayBaseUrl");
+
+            if (baseUrl == null)
+                throw new BaseUrlMissingException();
+            
+            return new Uri(baseUrl);
         }
 
         private static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()

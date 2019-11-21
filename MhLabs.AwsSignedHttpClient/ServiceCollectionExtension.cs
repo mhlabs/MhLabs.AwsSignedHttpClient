@@ -5,6 +5,7 @@ using Polly;
 using Polly.Extensions.Http;
 using System.IO;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -29,9 +30,9 @@ namespace MhLabs.AwsSignedHttpClient
         private static IServiceCollection AddMhHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
             where TImplementation : class, TClient
         {
-            if (options == null) options = new HttpOptions();
+            if (options == null) options = new HttpOptions(NullLogger.Instance);
 
-            var logger = options.logger;
+            var logger = options.Logger; 
             var httpClientBuilder = services.AddHttpClient<TClient, TImplementation>(client =>
                 {
                     client.BaseAddress = GetBaseUrl(options);

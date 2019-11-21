@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
 using System.IO;
+using Microsoft.Extensions.Logging;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -30,6 +31,7 @@ namespace MhLabs.AwsSignedHttpClient
         {
             if (options == null) options = new HttpOptions();
 
+            var logger = options.logger;
             var httpClientBuilder = services.AddHttpClient<TClient, TImplementation>(client =>
                 {
                     client.BaseAddress = GetBaseUrl(options);
@@ -39,7 +41,7 @@ namespace MhLabs.AwsSignedHttpClient
             if (options.RetryLevel == RetryLevel.Update)
             {
                 httpClientBuilder
-                    .AddPolicyHandler(GetRetryPolicy());
+                    .AddPolicyHandler(GetRetryPolicy(logger));
             }
 
             if (options.RetryLevel == RetryLevel.Read)
@@ -47,7 +49,7 @@ namespace MhLabs.AwsSignedHttpClient
                 httpClientBuilder
                     .AddPolicyHandler(request =>
                         request.Method == HttpMethod.Get
-                            ? GetRetryPolicy()
+                            ? GetRetryPolicy(logger)
                             : GetNoRetryPolicy());
             }
 
@@ -85,7 +87,7 @@ namespace MhLabs.AwsSignedHttpClient
             return circuitBreakerPolicy;
         }
 
-        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(ILogger logger)
         {
 
             var retryPolicy = HttpPolicyExtensions
@@ -96,8 +98,8 @@ namespace MhLabs.AwsSignedHttpClient
                             {
                                 var delay = TimeSpan.FromMilliseconds(Math.Pow(5, retryAttempt))
                                     + TimeSpan.FromMilliseconds(_jitterer.Next(0, 100));
-
-                                Console.WriteLine($"AwsSignedHttpClient - Retrying call, attempt: {retryAttempt}, delay ms: {delay.TotalMilliseconds}");
+                                
+                                logger.LogInformation("AwsSignedHttpClient - Retrying call, attempt: {RetryAttempt}, delay ms: {Delay}", retryAttempt, delay.TotalMilliseconds);
                                 return delay;
                             });
 

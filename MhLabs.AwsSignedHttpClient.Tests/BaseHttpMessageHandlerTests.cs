@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace MhLabs.AwsSignedHttpClient.Tests
@@ -7,7 +8,7 @@ namespace MhLabs.AwsSignedHttpClient.Tests
         [Fact]
         public void Should_Get_Inherited_Class_Name()
         {
-            var child = new AwsSignedHttpMessageHandler();
+            var child = new AwsSignedHttpMessageHandler(NullLogger<AwsSignedHttpMessageHandler>.Instance);
 
             Assert.Equal("AwsSignedHttpMessageHandler", child.ImplementingName);
         }

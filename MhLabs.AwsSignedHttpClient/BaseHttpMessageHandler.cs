@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -9,11 +10,17 @@ namespace MhLabs.AwsSignedHttpClient
     {
         public string ImplementingName => this.GetType().Name;
 
+        private readonly ILogger<BaseHttpMessageHandler> _logger;
+
+        public BaseHttpMessageHandler(ILogger<BaseHttpMessageHandler> logger)
+        {
+            _logger = logger;
+        }
+
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            Console.WriteLine($"{ImplementingName} - {request.Method}");
-            Console.WriteLine($"{ImplementingName} - {request.RequestUri}");
+            _logger.LogInformation("{MessageHandler} - {Method}: {RequestUri}", ImplementingName, request.Method, request.RequestUri);
 
             if (!request.Headers.Contains(CorrelationHelper.CorrelationIdHeader))
             {
@@ -22,8 +29,7 @@ namespace MhLabs.AwsSignedHttpClient
 
             var response = await base.SendAsync(request, cancellationToken);
 
-            Console.WriteLine($"{ImplementingName} - Response status code: {response?.StatusCode}");
-
+            _logger.LogInformation("{MessageHandler} - Response status code: {StatusCode}", ImplementingName, response?.StatusCode);
             return response;
         }
 

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon;
 using MhLabs.AwsSignedHttpClient.Credentials;
+using Microsoft.Extensions.Logging;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -12,7 +13,7 @@ namespace MhLabs.AwsSignedHttpClient
         private readonly string _region;
         private readonly ICredentialsProvider _credentialsProvider;
 
-        public AwsSignedHttpMessageHandler(ICredentialsProvider credentialsProvider = null)
+        public AwsSignedHttpMessageHandler(ILogger<AwsSignedHttpMessageHandler> logger, ICredentialsProvider credentialsProvider = null) : base(logger)
         {
             _region = Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION")?.ToLower();
             _credentialsProvider = credentialsProvider ?? CredentialChainProvider.Default;

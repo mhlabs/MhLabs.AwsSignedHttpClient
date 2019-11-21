@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using MhLabs.Extensions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
 
 namespace MhLabs.AwsSignedHttpClient
@@ -15,7 +16,7 @@ namespace MhLabs.AwsSignedHttpClient
     {
         public IClientConfig Config => throw new NotImplementedException();
 
-        public AwsHttpClient(string baseUrl) : base(new AwsSignedHttpMessageHandler { InnerHandler = new HttpClientHandler() })
+        public AwsHttpClient(string baseUrl) : base(new AwsSignedHttpMessageHandler (NullLogger<AwsSignedHttpMessageHandler>.Instance) { InnerHandler = new HttpClientHandler() })
         {
             BaseAddress = baseUrl.ToUri();
         }

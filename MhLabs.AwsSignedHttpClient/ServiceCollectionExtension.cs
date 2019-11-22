@@ -6,7 +6,6 @@ using Polly.Extensions.Http;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Http;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -14,43 +13,31 @@ namespace MhLabs.AwsSignedHttpClient
     {
         private static readonly Random _jitterer = new Random();
 
-        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null, ILogger<TClient> logger = null) where TClient : class
+        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
             where TImplementation : class, TClient
         {
             services.AddTransient<AwsSignedHttpMessageHandler>();
+            services.AddTransient<AwsSignedHttpMessageHandlerWithLogging<TClient>>();
 
-            return AddMhHttpClient<TClient, TImplementation>(services, options, logger);
+            return AddMhHttpClient<TClient, TImplementation>(services, options);
         }
 
-        public static IServiceCollection AddSignedHttpClientWithFileCredentials<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null, ILogger<TClient> logger = null) where TClient : class
+        public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
             where TImplementation : class, TClient
         {
-            services.AddTransient<AwsSignedHttpMessageHandler, AwsFileSignedHttpMessageHandler>();
-
-            return AddMhHttpClient<TClient, TImplementation>(services, options, logger);
+            return AddMhHttpClient<TClient, TImplementation>(services, options);
         }
 
-        public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null, ILogger<TClient> logger = null) where TClient : class
-            where TImplementation : class, TClient
-        {
-            return AddMhHttpClient<TClient, TImplementation>(services, options, logger);
-        }
-
-        private static IServiceCollection AddMhHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null, ILogger<TClient> logger = null) where TClient : class
+        private static IServiceCollection AddMhHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
             where TImplementation : class, TClient
         {
             
-            if (!services.Contains(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, HttpLogFilter<TClient>>()))
-            {
-                services.AddSingleton<IHttpMessageHandlerBuilderFilter, HttpLogFilter<TClient>>();
-            }
-
             if (options == null) options = new HttpOptions();
 
             var httpClientBuilder = services.AddHttpClient<TClient, TImplementation>(client =>
             {
                 client.BaseAddress = GetBaseUrl(options);
-            }).AddHttpMessageHandler<AwsSignedHttpMessageHandler>()
+            }).AddHttpMessageHandler<AwsSignedHttpMessageHandlerWithLogging<TClient>>()
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
             if (options.RetryLevel == RetryLevel.Update)

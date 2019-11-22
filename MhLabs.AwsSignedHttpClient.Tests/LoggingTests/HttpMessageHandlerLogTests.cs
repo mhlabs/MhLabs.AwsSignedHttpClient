@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Shouldly;
+using Microsoft.Extensions.Http;
+using MhLabs.AwsSignedHttpClient.Credentials;
 
 namespace MhLabs.AwsSignedHttpClient.Tests
 {
@@ -20,8 +22,9 @@ namespace MhLabs.AwsSignedHttpClient.Tests
             var testProvider = new TestLoggingProvider();
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddLogging(x => x.AddProvider(testProvider));
-            serviceCollection.AddSignedHttpClientWithFileCredentials<IGoogleService, GoogleService>(new HttpOptions { BaseUrl = "https://www.google.com"} );
-            serviceCollection.AddSignedHttpClientWithFileCredentials<IBingService, BingService>(new HttpOptions { BaseUrl = "https://www.bing.com"} );
+            serviceCollection.AddSingleton<ICredentialsProvider, AwsCredentialsFileProvider>();
+            serviceCollection.AddSignedHttpClient<IGoogleService, GoogleService>(new HttpOptions { BaseUrl = "https://www.google.com"} );
+            serviceCollection.AddSignedHttpClient<IBingService, BingService>(new HttpOptions { BaseUrl = "https://www.bing.com"} );
             
             var provider = serviceCollection.BuildServiceProvider();
             var google = provider.GetService<IGoogleService>();
@@ -36,6 +39,17 @@ namespace MhLabs.AwsSignedHttpClient.Tests
 
             // Assert
             TestConsoleLogger._logs.ShouldNotBeEmpty();
+
+            var filters = provider.GetServices<IHttpMessageHandlerBuilderFilter>();
+            foreach (var filter in filters)
+            {
+                System.Console.WriteLine($"Filter: {filter} - {filter.GetType().Name}");
+            }
+
+            foreach(var log in TestConsoleLogger._logs)
+            {
+                System.Console.WriteLine($"Name: {log.Name} - Log: {log.Log}");
+            }
         }
     }
 }

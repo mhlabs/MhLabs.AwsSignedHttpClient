@@ -3,19 +3,24 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using MhLabs.AwsSignedHttpClient.Credentials;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MhLabs.AwsSignedHttpClient
 {
-
-    public class LoggingScopeHttpMessageHandler : DelegatingHandler
+    public class AwsSignedHttpMessageHandlerWithLogging<TClient> : AwsSignedHttpMessageHandler
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<TClient> _logger;
 
-        public LoggingScopeHttpMessageHandler(ILogger logger)
+        public AwsSignedHttpMessageHandlerWithLogging(ILogger<TClient> logger, ICredentialsProvider credentialsProvider) : base(credentialsProvider)
         {
-            _logger = logger ?? NullLogger.Instance;
+            _logger = logger ?? NullLogger<TClient>.Instance;
+        }
+
+        public AwsSignedHttpMessageHandlerWithLogging(ILogger<TClient> logger)
+        {
+            _logger = logger ?? NullLogger<TClient>.Instance;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

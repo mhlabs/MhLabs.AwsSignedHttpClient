@@ -25,10 +25,7 @@ namespace MhLabs.AwsSignedHttpClient.Tests
         public async Task Get(string query, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Search Bing: {Query}", query);
-
-            var response = await _client.SendAsync<object>(HttpMethod.Get, $"search?q={query}", cancellationToken: cancellationToken);
-
-            _logger.LogInformation("Orders response: {Response}", response);
+            await _client.SendAsync<string>(HttpMethod.Get, $"search?q={query}", cancellationToken: cancellationToken);
         }
     }
 }

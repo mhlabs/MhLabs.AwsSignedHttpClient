@@ -32,7 +32,10 @@ namespace MhLabs.AwsSignedHttpClient
             where TImplementation : class, TClient
         {
             
-            var logging = InitializeLogging(services, logger);
+            if (!services.Contains(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, LogFilter<TClient>>()))
+            {
+                services.AddSingleton<IHttpMessageHandlerBuilderFilter, LogFilter<TClient>>();
+            }
 
             if (options == null) options = new HttpOptions();
 
@@ -45,15 +48,15 @@ namespace MhLabs.AwsSignedHttpClient
             if (options.RetryLevel == RetryLevel.Update)
             {
                 httpClientBuilder
-                    .AddPolicyHandler(GetRetryPolicy(logger));
+                    .AddPolicyHandler((serviceCollection, request) => GetRetryPolicy<TClient>(serviceCollection));
             }
 
             if (options.RetryLevel == RetryLevel.Read)
             {
                 httpClientBuilder
-                    .AddPolicyHandler(request =>
+                    .AddPolicyHandler((serviceCollection, request) => 
                         request.Method == HttpMethod.Get
-                            ? GetRetryPolicy(logger)
+                            ? GetRetryPolicy<TClient>(serviceCollection)
                             : GetNoRetryPolicy());
             }
 
@@ -64,18 +67,6 @@ namespace MhLabs.AwsSignedHttpClient
             }
 
             return services;
-        }
-
-        private static object InitializeLogging<TClient>(IServiceCollection services, ILogger<TClient> logger = null) where TClient : class
-        {
-            var log = logger ?? NullLogger<TClient>.Instance;
-
-            if (!services.Contains(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, LogFilter<TClient>>()))
-            {
-                services.AddSingleton<IHttpMessageHandlerBuilderFilter, LogFilter<TClient>>();
-            }
-
-            return log;
         }
 
         private static Uri GetBaseUrl(HttpOptions options)
@@ -103,7 +94,7 @@ namespace MhLabs.AwsSignedHttpClient
             return circuitBreakerPolicy;
         }
 
-        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(ILogger logger)
+        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy<TClient>(IServiceProvider serviceProvider)
         {
 
             var retryPolicy = HttpPolicyExtensions
@@ -112,11 +103,14 @@ namespace MhLabs.AwsSignedHttpClient
                 .WaitAndRetryAsync(3,
                             retryAttempt =>
                             {
-                                var delay = TimeSpan.FromMilliseconds(Math.Pow(5, retryAttempt))
-                                    + TimeSpan.FromMilliseconds(_jitterer.Next(0, 100));
-                                
-                                logger.LogInformation("AwsSignedHttpClient - Retrying call, attempt: {RetryAttempt}, delay ms: {Delay}", retryAttempt, delay.TotalMilliseconds);
-                                return delay;
+                                return TimeSpan.FromMilliseconds(Math.Pow(5, retryAttempt)) + 
+                                       TimeSpan.FromMilliseconds(_jitterer.Next(0, 100));
+                            },
+                            onRetry: (outcome, timespan, retryAttempt, context) =>
+                            {
+                                var logger = serviceProvider.GetService<ILogger<TClient>>() ?? NullLogger<TClient>.Instance;
+                                logger.LogWarning("Delaying for {Delay} ms, then making retry {Retry}. StatusCode: {StatusCode}. Exception: {Exception}", 
+                                    timespan.TotalMilliseconds, retryAttempt, outcome?.Result?.ReasonPhrase, outcome?.Result?.StatusCode, outcome?.Exception?.ToString());
                             });
 
             return retryPolicy;

@@ -13,7 +13,7 @@ namespace MhLabs.AwsSignedHttpClient
         private readonly string _region;
         private readonly ICredentialsProvider _credentialsProvider;
 
-        public AwsSignedHttpMessageHandler(ILogger<AwsSignedHttpMessageHandler> logger, ICredentialsProvider credentialsProvider = null) : base(logger)
+        public AwsSignedHttpMessageHandler(ICredentialsProvider credentialsProvider = null)
         {
             _region = Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION")?.ToLower();
             _credentialsProvider = credentialsProvider ?? CredentialChainProvider.Default;

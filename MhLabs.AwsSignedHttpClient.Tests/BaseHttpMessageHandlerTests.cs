@@ -8,8 +8,7 @@ namespace MhLabs.AwsSignedHttpClient.Tests
         [Fact]
         public void Should_Get_Inherited_Class_Name()
         {
-            var child = new AwsSignedHttpMessageHandler(NullLogger<AwsSignedHttpMessageHandler>.Instance);
-
+            var child = new AwsSignedHttpMessageHandler();
             Assert.Equal("AwsSignedHttpMessageHandler", child.ImplementingName);
         }
     }

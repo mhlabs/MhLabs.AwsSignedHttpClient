@@ -6,6 +6,7 @@ using Polly.Extensions.Http;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Http;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -30,13 +31,15 @@ namespace MhLabs.AwsSignedHttpClient
         private static IServiceCollection AddMhHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null, ILogger<TClient> logger = null) where TClient : class
             where TImplementation : class, TClient
         {
+            
+            var logging = InitializeLogging(services, logger);
+
             if (options == null) options = new HttpOptions();
-            if (logger == null) logger = NullLogger<TClient>.Instance;
 
             var httpClientBuilder = services.AddHttpClient<TClient, TImplementation>(client =>
-                {
-                    client.BaseAddress = GetBaseUrl(options);
-                }).AddHttpMessageHandler<AwsSignedHttpMessageHandler>()
+            {
+                client.BaseAddress = GetBaseUrl(options);
+            }).AddHttpMessageHandler<AwsSignedHttpMessageHandler>()
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
             if (options.RetryLevel == RetryLevel.Update)
@@ -61,6 +64,18 @@ namespace MhLabs.AwsSignedHttpClient
             }
 
             return services;
+        }
+
+        private static object InitializeLogging<TClient>(IServiceCollection services, ILogger<TClient> logger = null) where TClient : class
+        {
+            var log = logger ?? NullLogger<TClient>.Instance;
+
+            if (!services.Contains(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, LogFilter<TClient>>()))
+            {
+                services.AddSingleton<IHttpMessageHandlerBuilderFilter, LogFilter<TClient>>();
+            }
+
+            return log;
         }
 
         private static Uri GetBaseUrl(HttpOptions options)

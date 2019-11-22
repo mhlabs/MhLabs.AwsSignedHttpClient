@@ -16,7 +16,7 @@ namespace MhLabs.AwsSignedHttpClient
     {
         public IClientConfig Config => throw new NotImplementedException();
 
-        public AwsHttpClient(string baseUrl) : base(new AwsSignedHttpMessageHandler (NullLogger<AwsSignedHttpMessageHandler>.Instance) { InnerHandler = new HttpClientHandler() })
+        public AwsHttpClient(string baseUrl) : base(new AwsSignedHttpMessageHandler () { InnerHandler = new HttpClientHandler() })
         {
             BaseAddress = baseUrl.ToUri();
         }
@@ -44,9 +44,6 @@ namespace MhLabs.AwsSignedHttpClient
 
                 if (!result.IsSuccessStatusCode)
                 {
-                    Console.WriteLine("result.StatusCode: " + result.StatusCode);
-                    Console.WriteLine("result.Content: " + response);
-
                     if (result.StatusCode == HttpStatusCode.Forbidden)
                         throw new UnauthorizedAccessException("Unauthorized");
                 }

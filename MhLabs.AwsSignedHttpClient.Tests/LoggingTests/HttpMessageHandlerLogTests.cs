@@ -23,7 +23,7 @@ namespace MhLabs.AwsSignedHttpClient.Tests
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddLogging(x => x.AddProvider(testProvider));
             serviceCollection.AddSingleton<ICredentialsProvider, AwsCredentialsFileProvider>();
-            serviceCollection.AddSignedHttpClient<IGoogleService, GoogleService>(new HttpOptions { BaseUrl = "https://www.google.com"} );
+            serviceCollection.AddSignedHttpClient<IGoogleService, GoogleService>(new HttpOptions { BaseUrl = "https://www.google.com",RetryLevel = RetryLevel.Read} );
             serviceCollection.AddSignedHttpClient<IBingService, BingService>(new HttpOptions { BaseUrl = "https://www.bing.com"} );
             
             var provider = serviceCollection.BuildServiceProvider();

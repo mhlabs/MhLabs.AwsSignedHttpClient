@@ -13,26 +13,26 @@ namespace MhLabs.AwsSignedHttpClient
     {
         private static readonly Random _jitterer = new Random();
 
-        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
+        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null, ILogger<TClient> logger = null) where TClient : class
             where TImplementation : class, TClient
         {
             services.AddTransient<AwsSignedHttpMessageHandler>();
 
-            return AddMhHttpClient<TClient, TImplementation>(services, options);
+            return AddMhHttpClient<TClient, TImplementation>(services, options, logger);
         }
 
-        public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
+        public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null, ILogger<TClient> logger = null) where TClient : class
             where TImplementation : class, TClient
         {
-            return AddMhHttpClient<TClient, TImplementation>(services, options);
+            return AddMhHttpClient<TClient, TImplementation>(services, options, logger);
         }
 
-        private static IServiceCollection AddMhHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
+        private static IServiceCollection AddMhHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null, ILogger<TClient> logger = null) where TClient : class
             where TImplementation : class, TClient
         {
-            if (options == null) options = new HttpOptions(NullLogger.Instance);
+            if (options == null) options = new HttpOptions();
+            if (logger == null) logger = NullLogger<TClient>.Instance;
 
-            var logger = options.Logger; 
             var httpClientBuilder = services.AddHttpClient<TClient, TImplementation>(client =>
                 {
                     client.BaseAddress = GetBaseUrl(options);

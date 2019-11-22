@@ -6,11 +6,11 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace MhLabs.AwsSignedHttpClient
 {
 
-    public class LogFilter<TClient> : IHttpMessageHandlerBuilderFilter
+    public class HttpLogFilter<TClient> : IHttpMessageHandlerBuilderFilter
     {
         private readonly ILoggerFactory _loggerFactory;
 
-        public LogFilter(ILoggerFactory loggerFactory)
+        public HttpLogFilter(ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
         }

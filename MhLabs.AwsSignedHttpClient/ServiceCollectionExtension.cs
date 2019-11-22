@@ -22,6 +22,14 @@ namespace MhLabs.AwsSignedHttpClient
             return AddMhHttpClient<TClient, TImplementation>(services, options, logger);
         }
 
+        public static IServiceCollection AddSignedHttpClientWithFileCredentials<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null, ILogger<TClient> logger = null) where TClient : class
+            where TImplementation : class, TClient
+        {
+            services.AddTransient<AwsSignedHttpMessageHandler, AwsFileSignedHttpMessageHandler>();
+
+            return AddMhHttpClient<TClient, TImplementation>(services, options, logger);
+        }
+
         public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null, ILogger<TClient> logger = null) where TClient : class
             where TImplementation : class, TClient
         {
@@ -32,9 +40,9 @@ namespace MhLabs.AwsSignedHttpClient
             where TImplementation : class, TClient
         {
             
-            if (!services.Contains(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, LogFilter<TClient>>()))
+            if (!services.Contains(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, HttpLogFilter<TClient>>()))
             {
-                services.AddSingleton<IHttpMessageHandlerBuilderFilter, LogFilter<TClient>>();
+                services.AddSingleton<IHttpMessageHandlerBuilderFilter, HttpLogFilter<TClient>>();
             }
 
             if (options == null) options = new HttpOptions();

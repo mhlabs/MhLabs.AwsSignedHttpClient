@@ -1,19 +1,25 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon;
 using MhLabs.AwsSignedHttpClient.Credentials;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MhLabs.AwsSignedHttpClient
 {
-    public class AwsSignedHttpMessageHandler : BaseHttpMessageHandler
+    public class AwsSignedHttpMessageHandler<TClient> : BaseHttpMessageHandler
     {
         private readonly string _region;
         private readonly ICredentialsProvider _credentialsProvider;
+        private readonly ILogger<TClient> _logger;
 
-        public AwsSignedHttpMessageHandler(ICredentialsProvider credentialsProvider = null)
+        public AwsSignedHttpMessageHandler(ILoggerFactory loggerFactory, ICredentialsProvider credentialsProvider = null)
         {
+            System.Console.WriteLine($"[AwsSignedHttpMessageHandler<{typeof(TClient).Name}>]: Creating with ILoggerFactory: {loggerFactory?.GetType()}");
+            _logger = loggerFactory?.CreateLogger<TClient>() ?? NullLogger<TClient>.Instance;
             _region = Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION")?.ToLower();
             _credentialsProvider = credentialsProvider ?? CredentialChainProvider.Default;
         }
@@ -23,7 +29,7 @@ namespace MhLabs.AwsSignedHttpClient
         {
             await SignRequest(request);
 
-            return await base.SendAsync(request, cancellationToken);
+            return await SendAsyncWithLogging(request, cancellationToken);
         }
 
         private async Task SignRequest(HttpRequestMessage request)
@@ -33,6 +39,21 @@ namespace MhLabs.AwsSignedHttpClient
             if (credentials == null)
                 throw new Exception("Unable to retrieve credentials required to sign the request.");
             SignV4Util.SignRequest(request, body, credentials, _region, "execute-api");
+        }
+
+        private async Task<HttpResponseMessage> SendAsyncWithLogging(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var timer = new Stopwatch();
+            timer.Start();
+
+            _logger.LogInformation("Request - {Method}: {Uri}", request?.Method, request?.RequestUri);
+
+            var response = await base.SendAsync(request, cancellationToken);
+
+            timer.Stop();
+            _logger.LogInformation("Response - {Method}: {Uri} - {StatusCode} - {Elapsed} ms - {IsSuccessStatusCode}", request?.Method, request?.RequestUri, response.StatusCode, timer.ElapsedMilliseconds, response.IsSuccessStatusCode);
+
+            return response;
         }
     }
 }

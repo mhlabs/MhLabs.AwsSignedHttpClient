@@ -16,8 +16,7 @@ namespace MhLabs.AwsSignedHttpClient
         public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
             where TImplementation : class, TClient
         {
-            services.AddTransient<AwsSignedHttpMessageHandler>();
-            services.AddTransient<AwsSignedHttpMessageHandlerWithLogging<TClient>>();
+            services.AddTransient<AwsSignedHttpMessageHandler<TClient>>();
 
             return AddMhHttpClient<TClient, TImplementation>(services, options);
         }
@@ -37,7 +36,7 @@ namespace MhLabs.AwsSignedHttpClient
             var httpClientBuilder = services.AddHttpClient<TClient, TImplementation>(client =>
             {
                 client.BaseAddress = GetBaseUrl(options);
-            }).AddHttpMessageHandler<AwsSignedHttpMessageHandlerWithLogging<TClient>>()
+            }).AddHttpMessageHandler<AwsSignedHttpMessageHandler<TClient>>()
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5));
 
             if (options.RetryLevel == RetryLevel.Update)

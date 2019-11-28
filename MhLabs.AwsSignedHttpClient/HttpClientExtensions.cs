@@ -17,10 +17,9 @@ namespace MhLabs.AwsSignedHttpClient
         {
             var executionResult = await ExecuteAsync<TReturn>(client, method, path, postData, contentType, cancellationToken);
 
-            if (!executionResult.Success)
+            if (executionResult.StatusCode == HttpStatusCode.Forbidden)
             {
-                if (executionResult.StatusCode == HttpStatusCode.Forbidden)
-                    throw new UnauthorizedAccessException("Unauthorized");
+                throw new UnauthorizedAccessException("Unauthorized");
             }
 
             return executionResult.Data;
@@ -36,44 +35,38 @@ namespace MhLabs.AwsSignedHttpClient
             {
                 if (method == HttpMethod.Post || method == HttpMethod.Put || method == HttpMethod.Delete || method == new HttpMethod("PATCH"))
                 {
-                    var requestData = postData as HttpContent;
-                    request.Content = requestData ?? new StringContent(
-                                          postData is string
-                                              ? postData.ToString()
-                                              : JsonConvert.SerializeObject(postData), Encoding.UTF8,
-                                          contentType);
+                    request.Content = ToContent(postData, contentType, request, postData as HttpContent);
                 }
 
                 var response = await client.SendAsync(request, cancellationToken);
-
                 var content = await response.Content.ReadAsStringAsync();
 
-                if (!response.IsSuccessStatusCode)
+                if (response.StatusCode == HttpStatusCode.Forbidden)
                 {
-                    Console.WriteLine("result.StatusCode: " + response.StatusCode);
-                    Console.WriteLine("result.Content: " + content);
-
-                    if (response.StatusCode == HttpStatusCode.Forbidden)
-                    {
-                        return new ExecutionResult<TReturn>(HttpStatusCode.Forbidden, default(TReturn));
-                    }
+                    return new ExecutionResult<TReturn>(HttpStatusCode.Forbidden, default(TReturn));
                 }
 
-                TReturn data;
-
-                if (typeof(TReturn) == typeof(string) || typeof(TReturn) == typeof(decimal))
-                {
-                    data = content as TReturn;
-                }
-                else
-                {
-                    data = JsonConvert.DeserializeObject<TReturn>(content);
-                }
-
+                var data = ToData<TReturn>(content);
                 return new ExecutionResult<TReturn>(response.StatusCode, data);
-
             }
         }
 
+        private static HttpContent ToContent(object postData, string contentType, HttpRequestMessage request, HttpContent requestData)
+        {
+            var content = postData is string ? 
+                                postData.ToString() : 
+                                JsonConvert.SerializeObject(postData);
+
+            return requestData ?? new StringContent(content, Encoding.UTF8, contentType);
+        }
+
+        private static TReturn ToData<TReturn>(string content) where TReturn : class
+        {
+            if (typeof(TReturn) == typeof(string) || typeof(TReturn) == typeof(decimal))
+            {
+                return content as TReturn;
+            }
+            return JsonConvert.DeserializeObject<TReturn>(content);
+        }
     }
 }

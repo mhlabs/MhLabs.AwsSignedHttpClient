@@ -1,13 +1,12 @@
-using Amazon.Runtime;
-using MhLabs.AwsSignedHttpClient.Credentials;
+using Microsoft.Extensions.Logging;
 
 namespace MhLabs.AwsSignedHttpClient
 {
 
-    public class AwsFileSignedHttpMessageHandler : AwsSignedHttpMessageHandler
+    public class AwsFileSignedHttpMessageHandler<TClient> : AwsSignedHttpMessageHandler<TClient>
     {
-        public AwsFileSignedHttpMessageHandler() 
-            : base(new AwsCredentialsFileProvider())
+        public AwsFileSignedHttpMessageHandler(ILoggerFactory loggerFactory) 
+            : base(loggerFactory, new AwsCredentialsFileProvider())
         {
         }
     }

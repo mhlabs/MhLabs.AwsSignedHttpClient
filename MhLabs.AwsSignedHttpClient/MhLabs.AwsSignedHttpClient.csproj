@@ -5,15 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.Core" Version="1.0.0" />
-    <PackageReference Include="AWSSDK.Core" Version="3.3.21.10" />
-    <PackageReference Include="AWSXRayRecorder.Handlers.System.Net" Version="2.2.0-beta" />
-    <PackageReference Include="MhLabs.Extensions" Version="1.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.0.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="2.1.0" />
+    <PackageReference Include="Amazon.Lambda.Core" Version="1.1.0" />
+    <PackageReference Include="AWSSDK.Core" Version="3.3.103" />
+    <PackageReference Include="MhLabs.Extensions" Version="1.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="3.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="3.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.0.1" />
     <PackageReference Include="newtonsoft.json" Version="12.0.1" />
-    <PackageReference Include="Polly.Extensions.Http" Version="2.0.1" />
+    <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
   </ItemGroup>
 </Project>

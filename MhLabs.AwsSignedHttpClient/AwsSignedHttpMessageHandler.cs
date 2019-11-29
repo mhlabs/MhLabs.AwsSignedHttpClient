@@ -14,18 +14,17 @@ namespace MhLabs.AwsSignedHttpClient
     {
         private readonly string _region;
         private readonly ICredentialsProvider _credentialsProvider;
-        private readonly ILogger<TClient> _logger;
+        private readonly ILogger _logger;
 
         public AwsSignedHttpMessageHandler(ILoggerFactory loggerFactory, ICredentialsProvider credentialsProvider = null)
         {
-            System.Console.WriteLine($"[AwsSignedHttpMessageHandler<{typeof(TClient).Name}>]: Creating with ILoggerFactory: {loggerFactory?.GetType()}");
-            _logger = loggerFactory?.CreateLogger<TClient>() ?? NullLogger<TClient>.Instance;
+            System.Console.WriteLine($"[>]: Creating with ILoggerFactory: {loggerFactory?.GetType()}");
+            _logger = loggerFactory.CreateDefaultLogger<TClient>();
             _region = Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION")?.ToLower();
             _credentialsProvider = credentialsProvider ?? CredentialChainProvider.Default;
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-            CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             await SignRequest(request);
 
@@ -46,12 +45,12 @@ namespace MhLabs.AwsSignedHttpClient
             var timer = new Stopwatch();
             timer.Start();
 
-            _logger.LogInformation("Request - {Method}: {Uri}", request?.Method, request?.RequestUri);
+            _logger.LogInformation("HttpRequest - {Method}: {Uri}", request?.Method, request?.RequestUri);
 
             var response = await base.SendAsync(request, cancellationToken);
 
             timer.Stop();
-            _logger.LogInformation("Response - {Method}: {Uri} - {StatusCode} - {Elapsed} ms - {IsSuccessStatusCode}", request?.Method, request?.RequestUri, response.StatusCode, timer.ElapsedMilliseconds, response.IsSuccessStatusCode);
+            _logger.LogInformation("HttpResponse - {Method}: {Uri} returned {StatusCode} in {Elapsed}ms. Success: {IsSuccessStatusCode}", request?.Method, request?.RequestUri, response.StatusCode, timer.ElapsedMilliseconds, response.IsSuccessStatusCode);
 
             return response;
         }

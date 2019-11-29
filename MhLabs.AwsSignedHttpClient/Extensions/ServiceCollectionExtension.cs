@@ -102,7 +102,7 @@ namespace MhLabs.AwsSignedHttpClient
                             },
                             onRetry: (outcome, timespan, retryAttempt, context) =>
                             {
-                                var logger = serviceProvider.GetService<ILogger<TClient>>() ?? NullLogger<TClient>.Instance;
+                                var logger = serviceProvider.GetService<ILoggerFactory>().CreateDefaultLogger<TClient>();
                                 logger.LogWarning("Delaying for {Delay} ms, then making retry {Retry}. StatusCode: {StatusCode}. Exception: {Exception}", 
                                     timespan.TotalMilliseconds, retryAttempt, outcome?.Result?.ReasonPhrase, outcome?.Result?.StatusCode, outcome?.Exception?.ToString());
                             });

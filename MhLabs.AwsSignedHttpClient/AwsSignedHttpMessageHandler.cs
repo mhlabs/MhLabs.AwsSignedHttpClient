@@ -11,7 +11,6 @@ namespace MhLabs.AwsSignedHttpClient
     {
         private readonly string _region;
         private readonly ICredentialsProvider _credentialsProvider;
-        private readonly ILogger _logger;
 
         public AwsSignedHttpMessageHandler(ILoggerFactory loggerFactory, ICredentialsProvider credentialsProvider = null) : base(loggerFactory)
         {
@@ -32,7 +31,7 @@ namespace MhLabs.AwsSignedHttpClient
             var credentials = _credentialsProvider.GetCredentials();
             if (credentials == null)
                 throw new Exception("Unable to retrieve credentials required to sign the request.");
-                
+
             SignV4Util.SignRequest(request, body, credentials, _region, "execute-api");
         }
     }

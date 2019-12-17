@@ -24,12 +24,15 @@ namespace MhLabs.AwsSignedHttpClient
             return FallbackFactory;
         }
 
-        public static ILogger CreateDefaultLogger<TClient>(this ILoggerFactory loggerFactory)
+        public static ILogger CreateDefaultLogger<TClient>(this ILoggerFactory loggerFactory, string type)
         {
-            const string name = "AwsSignedHttpMessageHandler<{typeof(TClient).Name}>";
+            var name = $"{type}<{typeof(TClient).Name}>";
+            return loggerFactory.CreateLogger(name) ?? FallbackFactory.CreateLogger(name);
+        }
 
-            if (loggerFactory == null) return NullLogger.Instance;
-
+        public static ILogger CreateDefaultLogger<TClient, TMessageHandler>(this ILoggerFactory loggerFactory)
+        {
+            var name = $"{typeof(TMessageHandler).Name}<{typeof(TClient).Name}>";
             return loggerFactory.CreateLogger(name) ?? FallbackFactory.CreateLogger(name);
         }
     }

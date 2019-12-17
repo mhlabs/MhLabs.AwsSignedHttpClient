@@ -24,7 +24,7 @@ namespace MhLabs.AwsSignedHttpClient.Tests
             serviceCollection.AddLogging(x => x.AddProvider(testProvider));
             serviceCollection.AddSingleton<ICredentialsProvider, AwsCredentialsFileProvider>();
             serviceCollection.AddSignedHttpClient<IGoogleService, GoogleService>(new HttpOptions { BaseUrl = "https://www.google.com",RetryLevel = RetryLevel.Read} );
-            serviceCollection.AddSignedHttpClient<IBingService, BingService>(new HttpOptions { BaseUrl = "https://www.bing.com"} );
+            serviceCollection.AddUnsignedHttpClient<IBingService, BingService>(new HttpOptions { BaseUrl = "https://www.bing.com"} );
             
             var provider = serviceCollection.BuildServiceProvider();
             var google = provider.GetService<IGoogleService>();

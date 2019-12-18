@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace MhLabs.AwsSignedHttpClient
 {
     public class HttpOptions

@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
 using Xunit;
@@ -20,11 +21,14 @@ namespace MhLabs.AwsSignedHttpClient.Tests
             [Fact]
             public async Task Playground_for_verifying_polly_behaviour()
             {
-                IServiceCollection services = new ServiceCollection();
-
+                var services = new ServiceCollection();
                 var clientId = "x";
                 var retryCount = 0;
                 var exceptionCount = 0;
+                services.AddLogging(loggingBuilder =>
+                {
+                    loggingBuilder.AddConsole();
+                });
 
                 try
                 {

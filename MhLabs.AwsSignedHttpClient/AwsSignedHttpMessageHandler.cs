@@ -2,24 +2,23 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon;
 using MhLabs.AwsSignedHttpClient.Credentials;
+using Microsoft.Extensions.Logging;
 
 namespace MhLabs.AwsSignedHttpClient
 {
-    public class AwsSignedHttpMessageHandler : BaseHttpMessageHandler
+    public class AwsSignedHttpMessageHandler<TClient>: BaseHttpMessageHandler<TClient>
     {
         private readonly string _region;
         private readonly ICredentialsProvider _credentialsProvider;
 
-        public AwsSignedHttpMessageHandler(ICredentialsProvider credentialsProvider = null)
+        public AwsSignedHttpMessageHandler(ILoggerFactory loggerFactory, ICredentialsProvider credentialsProvider = null) : base(loggerFactory)
         {
             _region = Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION")?.ToLower();
             _credentialsProvider = credentialsProvider ?? CredentialChainProvider.Default;
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-            CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             await SignRequest(request);
 
@@ -32,6 +31,7 @@ namespace MhLabs.AwsSignedHttpClient
             var credentials = _credentialsProvider.GetCredentials();
             if (credentials == null)
                 throw new Exception("Unable to retrieve credentials required to sign the request.");
+
             SignV4Util.SignRequest(request, body, credentials, _region, "execute-api");
         }
     }

@@ -12,7 +12,8 @@ namespace MhLabs.AwsSignedHttpClient
     {
         private static readonly Random _jitterer = new Random();
 
-        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
+        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) 
+            where TClient : class
             where TImplementation : class, TClient
         {
             services.AddTransient<AwsSignedHttpMessageHandler<TClient>>();
@@ -31,7 +32,7 @@ namespace MhLabs.AwsSignedHttpClient
             where TMessageHandler : DelegatingHandler
         {
             options = options ?? new HttpOptions();
-            
+
             var builder = CreateHttpBuilder<TClient, TImplementation, TMessageHandler>(services, options);
 
             ApplyPollyConfiguration<TClient, TMessageHandler>(options, builder);
@@ -121,7 +122,7 @@ namespace MhLabs.AwsSignedHttpClient
                                        TimeSpan.FromMilliseconds(_jitterer.Next(0, 100));
                             },
                             onRetry: (outcome, timespan, retryAttempt, context) =>
-                            {                                
+                            {
                                 logger.LogWarning("Delaying for {Delay} ms, then making retry {Retry}. StatusCode: {StatusCode}. Exception: {Exception}", 
                                     timespan.TotalMilliseconds, retryAttempt, outcome?.Result?.ReasonPhrase, outcome?.Result?.StatusCode, outcome?.Exception?.ToString());
                             });

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +22,7 @@ namespace MhLabs.AwsSignedHttpClient.Tests
             serviceCollection.AddSingleton<ICredentialsProvider, AwsCredentialsFileProvider>();
             serviceCollection.AddSignedHttpClient<IGoogleService, GoogleService>(new HttpOptions { BaseUrl = "https://www.google.com",RetryLevel = RetryLevel.Read} );
             serviceCollection.AddUnsignedHttpClient<IBingService, BingService>(new HttpOptions { BaseUrl = "https://www.bing.com"} );
-            
+
             var provider = serviceCollection.BuildServiceProvider();
             var google = provider.GetService<IGoogleService>();
             var bing = provider.GetService<IBingService>();

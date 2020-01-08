@@ -16,18 +16,20 @@ namespace MhLabs.AwsSignedHttpClient
             where TClient : class
             where TImplementation : class, TClient
         {
-            services.AddTransient<AwsSignedHttpMessageHandler<TClient>>();
-            return AddMhHttpClient<TClient, TImplementation, AwsSignedHttpMessageHandler<TClient>>(services, options);
+            services.AddTransient<AwsSignedHttpMessageHandler>();
+            return AddMhHttpClient<TClient, TImplementation, AwsSignedHttpMessageHandler>(services, options);
         }
 
-        public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) where TClient : class
+        public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) 
+            where TClient : class
             where TImplementation : class, TClient
         {
-            services.AddTransient<BaseHttpMessageHandler<TClient>>();
-            return AddMhHttpClient<TClient, TImplementation, BaseHttpMessageHandler<TClient>>(services, options);
+            services.AddTransient<BaseHttpMessageHandler>();
+            return AddMhHttpClient<TClient, TImplementation, BaseHttpMessageHandler>(services, options);
         }
 
-        private static IServiceCollection AddMhHttpClient<TClient, TImplementation, TMessageHandler>(this IServiceCollection services, HttpOptions options = null) where TClient : class
+        private static IServiceCollection AddMhHttpClient<TClient, TImplementation, TMessageHandler>(this IServiceCollection services, HttpOptions options = null) 
+            where TClient : class
             where TImplementation : class, TClient
             where TMessageHandler : DelegatingHandler
         {
@@ -91,7 +93,7 @@ namespace MhLabs.AwsSignedHttpClient
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             var logger = loggerFactory.CreateDefaultLogger<TClient, TMessageHandler>();
 
-            var circuitBreakerPolicy = HttpPolicyExtensions
+            return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrInner<IOException>()
                 .CircuitBreakerAsync(3, TimeSpan.FromSeconds(30), 
@@ -103,8 +105,6 @@ namespace MhLabs.AwsSignedHttpClient
                 },
                 () => logger.LogWarning("Circuit breaker - State: {CircuitState}. Event: {CircuitEvent}.", Polly.CircuitBreaker.CircuitState.Closed, "onReset"),
                 () => logger.LogWarning("Circuit breaker - State: {CircuitState}. Event: {CircuitEvent}.", Polly.CircuitBreaker.CircuitState.HalfOpen, "onHalfOpen"));
-
-            return circuitBreakerPolicy;
         }
 
         private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy<TClient, TMessageHandler>(IServiceProvider serviceProvider)
@@ -112,7 +112,7 @@ namespace MhLabs.AwsSignedHttpClient
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             var logger = loggerFactory.CreateDefaultLogger<TClient, TMessageHandler>();
 
-            var retryPolicy = HttpPolicyExtensions
+            return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrInner<IOException>()
                 .WaitAndRetryAsync(3,
@@ -126,14 +126,11 @@ namespace MhLabs.AwsSignedHttpClient
                                 logger.LogWarning("Delaying for {Delay} ms, then making retry {Retry}. StatusCode: {StatusCode}. Exception: {Exception}", 
                                     timespan.TotalMilliseconds, retryAttempt, outcome?.Result?.ReasonPhrase, outcome?.Result?.StatusCode, outcome?.Exception?.ToString());
                             });
-
-            return retryPolicy;
         }
 
         private static IAsyncPolicy<HttpResponseMessage> GetNoRetryPolicy()
         {
             return Policy.NoOpAsync().AsAsyncPolicy<HttpResponseMessage>();
         }
-
     }
 }

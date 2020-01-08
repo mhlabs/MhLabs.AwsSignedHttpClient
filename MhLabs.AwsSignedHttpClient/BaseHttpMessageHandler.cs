@@ -7,15 +7,13 @@ using Microsoft.Extensions.Logging;
 
 namespace MhLabs.AwsSignedHttpClient
 {
-    public class BaseHttpMessageHandler<TClient> : DelegatingHandler
+    public class BaseHttpMessageHandler : DelegatingHandler
     {
-        public string ImplementingName => this.GetType().Name;
-
         private readonly ILogger _logger;
 
         public BaseHttpMessageHandler (ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateDefaultLogger<TClient>(ImplementingName);
+            _logger = loggerFactory.CreateDefaultLogger(GetType().Name);
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

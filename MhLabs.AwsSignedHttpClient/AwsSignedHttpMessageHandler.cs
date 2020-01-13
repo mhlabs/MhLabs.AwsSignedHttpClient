@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MhLabs.AwsSignedHttpClient.Credentials;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -13,6 +14,11 @@ namespace MhLabs.AwsSignedHttpClient
         private readonly ICredentialsProvider _credentialsProvider;
 
         public AwsSignedHttpMessageHandler(ILoggerFactory loggerFactory, ICredentialsProvider credentialsProvider = null) : base(loggerFactory)
+        {
+            _credentialsProvider = credentialsProvider ?? CredentialChainProvider.Default;
+        }
+
+        public AwsSignedHttpMessageHandler(ICredentialsProvider credentialsProvider = null) : base(NullLoggerFactory.Instance)
         {
             _credentialsProvider = credentialsProvider ?? CredentialChainProvider.Default;
         }

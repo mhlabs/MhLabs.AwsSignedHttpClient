@@ -9,6 +9,9 @@ namespace MhLabs.AwsSignedHttpClient
     {
         internal static async Task SignRequest(this HttpRequestMessage request, ICredentialsProvider credentialsProvider, string region)
         {
+            if (request == null)
+                throw new ArgumentException("HttpRequestMessage is null");
+
             var body = VerbCanContainBody(request) ?
                 await request.Content?.ReadAsByteArrayAsync() :
                 null;

@@ -12,18 +12,25 @@ namespace MhLabs.AwsSignedHttpClient
             if (request == null)
                 throw new ArgumentException("HttpRequestMessage is null");
 
-            var body = VerbCanContainBody(request) ?
-                await request.Content?.ReadAsByteArrayAsync() :
-                null;
-
             if (credentialsProvider == null)
                 throw new Exception("CredentialsProvider is null. Probably because it is not registered in IoC");
+
+            var body = VerbCanContainBody(request) ?
+                await ExtractBody(request) :
+                null;
 
             var credentials = credentialsProvider.GetCredentials();
             if (credentials == null)
                 throw new Exception("Unable to retrieve credentials required to sign the request.");
 
             SignV4Util.SignRequest(request, body, credentials, region, "execute-api");
+        }
+
+        private static async Task<byte[]> ExtractBody(HttpRequestMessage request)
+        {
+            if (request.Content == null) return new byte[0];
+
+            return await request.Content?.ReadAsByteArrayAsync();
         }
 
         private static bool VerbCanContainBody(HttpRequestMessage request)

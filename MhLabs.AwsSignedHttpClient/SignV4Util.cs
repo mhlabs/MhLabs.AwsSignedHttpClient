@@ -172,12 +172,12 @@ namespace MhLabs.AwsSignedHttpClient
             }
         }
 
-        private static IDictionary<string, string> ParseQueryString(string query)
+        private static List<KeyValuePair<string, string>> ParseQueryString(string query)
         {
             return QueryHelpers.ParseQuery(query)
-                .Aggregate(new Dictionary<string, string>(), (col, kv) =>
+                .Aggregate(new List<KeyValuePair<string, string>>(), (col, kv) =>
                 {
-                    kv.Value.ToList().ForEach(v => col.Add(kv.Key, v));
+                    kv.Value.ToList().ForEach(v => col.Add(new KeyValuePair<string, string>(kv.Key, v)));
                     return col;
                 });
         }

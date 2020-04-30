@@ -8,14 +8,14 @@ namespace MhLabs.AwsSignedHttpClient.Tests
         [Fact]
         public void Should_Determine_Success()
         {
-            var result = new ExecutionResult<string>(HttpStatusCode.NoContent, null);
+            var result = new ExecutionResult<string>(HttpStatusCode.NoContent, null, null);
             Assert.True(result.Success);
         }
 
         [Fact]
         public void Should_Determine_Failutre()
         {
-            var result = new ExecutionResult<string>(HttpStatusCode.Unauthorized, null);
+            var result = new ExecutionResult<string>(HttpStatusCode.Unauthorized, null, null);
             Assert.False(result.Success);
         }
 

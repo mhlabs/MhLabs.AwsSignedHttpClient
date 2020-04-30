@@ -25,10 +25,8 @@ namespace MhLabs.AwsSignedHttpClient.Tests
                 var clientId = "x";
                 var retryCount = 0;
                 var exceptionCount = 0;
-                services.AddLogging(loggingBuilder =>
-                {
-                    loggingBuilder.AddConsole();
-                });
+
+                // services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 
                 try
                 {
@@ -39,7 +37,7 @@ namespace MhLabs.AwsSignedHttpClient.Tests
                             .RetryAsync(3, onRetry: (_, __) =>
                             {
                                 retryCount++;
-                                Console.WriteLine("I have tried again!");
+                                // Console.WriteLine("I have tried again!");
                             });
 
                     services.AddHttpClient(clientId)

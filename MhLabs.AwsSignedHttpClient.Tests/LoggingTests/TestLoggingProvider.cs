@@ -15,12 +15,12 @@ namespace MhLabs.AwsSignedHttpClient.Tests
     {
         public ILogger CreateLogger(string categoryName)
         {
-            return new TestConsoleLogger(categoryName);
+            return new TestLogger(categoryName);
         }
 
         public void Dispose()
         {
-            
+
         }
     }
 }

@@ -11,12 +11,12 @@ using Shouldly;
 namespace MhLabs.AwsSignedHttpClient.Tests
 {
 
-    public class TestConsoleLogger : ILogger
+    public class TestLogger : ILogger
     {
         static internal readonly List<TestLog> _logs = new List<TestLog>();
         private string categoryName;
 
-        public TestConsoleLogger(string categoryName)
+        public TestLogger(string categoryName)
         {
             this.categoryName = categoryName;
         }
@@ -37,10 +37,10 @@ namespace MhLabs.AwsSignedHttpClient.Tests
             {
                 return;
             }
-            
+
             var log = $"{logLevel.ToString()} - {categoryName} - {eventId.Id} - {formatter(state, exception)}";
-            Console.WriteLine(log);
-            _logs.Add(new TestLog {
+            _logs.Add(new TestLog
+            {
                 Name = categoryName,
                 Log = log
             });

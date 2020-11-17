@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MhLabs.AwsSignedHttpClient</name>
+    </assembly>
+    <members>
+        <member name="T:MhLabs.AwsSignedHttpClient.Credentials.AwsCredentials">
+            <summary>
+                Encapsulates AWS credentials needed for request signing.
+            </summary>
+        </member>
+        <member name="P:MhLabs.AwsSignedHttpClient.Credentials.AwsCredentials.AccessKey">
+            <summary>
+                Gets or sets the AWS access key. Required.
+            </summary>
+        </member>
+        <member name="P:MhLabs.AwsSignedHttpClient.Credentials.AwsCredentials.SecretKey">
+            <summary>
+                Gets or sets the AWS secret key. e.g. wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY
+                Required.
+            </summary>
+        </member>
+        <member name="P:MhLabs.AwsSignedHttpClient.Credentials.AwsCredentials.Token">
+            <summary>
+                Gets or sets the security token.
+            </summary>
+        </member>
+        <member name="M:MhLabs.AwsSignedHttpClient.HttpClientExtensions.MhSendAsync(System.Net.Http.HttpClient,System.Net.Http.HttpMethod,System.String,System.Object,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Send request using httpClient
+            </summary>
+            <param name="client"></param>
+            <param name="method"></param>
+            <param name="path"></param>
+            <param name="postData"></param>
+            <param name="contentType"></param>
+            <param name="cancellationToken"></param>
+            <returns><see cref="T:System.Net.Http.HttpResponseMessage"/></returns>
+        </member>
+    </members>
+</doc>

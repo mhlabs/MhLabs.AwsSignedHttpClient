@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +24,32 @@ namespace MhLabs.AwsSignedHttpClient
             }
 
             return executionResult.Data;
+        }
+
+        /// <summary>
+        /// Send request using httpClient
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="method"></param>
+        /// <param name="path">with our without initial slash</param>
+        /// <param name="postData">default null</param>
+        /// <param name="contentType">default application/json</param>
+        /// <param name="cancellationToken">default default :)</param>
+        /// <returns><see cref="HttpResponseMessage"/></returns>
+        public static async Task<HttpResponseMessage> MhSendAsync(this HttpClient client, HttpMethod method, string path, object postData = null,
+            string contentType = "application/json", CancellationToken cancellationToken = default)
+        {
+            path = path.TrimStart('/');
+            using (var request = new HttpRequestMessage(method, client.BaseAddress + path))
+            {
+                if (method == HttpMethod.Post || method == HttpMethod.Put || method == HttpMethod.Delete || method == new HttpMethod("PATCH"))
+                {
+                    request.Content = ToContent(postData, contentType, postData as HttpContent);
+                }
+                
+                var response = await client.SendAsync(request, cancellationToken);
+                return response;
+            }
         }
 
         public static async Task<ExecutionResult<TReturn>> ExecuteAsync<TReturn>(this HttpClient client, HttpMethod method, string path, object postData = null,

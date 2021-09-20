@@ -20,7 +20,16 @@ namespace MhLabs.AwsSignedHttpClient
             return AddMhHttpClient<TClient, TImplementation, AwsSignedHttpMessageHandler>(services, options);
 
         }
-
+        /// <summary>
+        /// AddSignedHttpClientWitHttpClientBuilder
+        /// This method adds a creates a HttpClient with AwsSignedHttpMessageHandler and returns IHttpClientBuilder
+        /// which can be used to configure the client further
+        /// </summary>
+        /// <typeparam name="TClient"></typeparam>
+        /// <typeparam name="TImplementation"></typeparam>
+        /// <param name="services"></param>
+        /// <param name="options"></param>
+        /// <returns>An <see cref="IHttpClientBuilder"/> that can be used to configure the client.</returns>
         public static IHttpClientBuilder AddSignedHttpClientWitHttpClientBuilder<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null)
             where TClient : class
             where TImplementation : class, TClient
@@ -37,7 +46,6 @@ namespace MhLabs.AwsSignedHttpClient
             services.AddTransient<BaseHttpMessageHandler>();
             return AddMhHttpClient<TClient, TImplementation, BaseHttpMessageHandler>(services, options);
         }
-
 
         private static IHttpClientBuilder AddMhHttpClientWitHttpClientBuilder<TClient, TImplementation, TMessageHandler>(this IServiceCollection services, HttpOptions options = null)
             where TClient : class

@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,6 +57,45 @@ namespace MhLabs.AwsSignedHttpClient.Tests
             // {
             //     System.Console.WriteLine($"Name: {log.Name} - Log: {log.Log}");
             // }
+        }
+
+        [Fact]
+        public async Task Should_Be_Able_To_Register_Custom_MessageHandler_Per_ClientAsync()
+        {
+            // Arrange
+            var credentialsProvider = new Mock<ICredentialsProvider>();
+            credentialsProvider.Setup(mock => mock.GetCredentials()).Returns(new AwsCredentials());
+
+            var testProvider = new TestLoggingProvider();
+            var serviceCollection = new ServiceCollection();
+            
+            serviceCollection.AddLogging(x => x.AddProvider(testProvider));
+            serviceCollection.AddSingleton<ICredentialsProvider>(credentialsProvider.Object);
+            serviceCollection.AddTransient<TestDelegatingHandler>();
+
+            serviceCollection.AddSignedHttpClientWitHttpClientBuilder<IGoogleService, GoogleService>(new HttpOptions { BaseUrl = "https://www.google.com", RetryLevel = RetryLevel.Read }).AddHttpMessageHandler<TestDelegatingHandler>();
+
+            var provider = serviceCollection.BuildServiceProvider();
+            var google = provider.GetService<IGoogleService>();
+
+            var cts = new CancellationTokenSource(5000);
+            var token = cts.Token;
+
+            // Act
+            await google.Get("hello world", token);
+
+            // Assert
+            TestLogger._logs.ShouldNotBeEmpty();
+
+           
+        }
+
+        public class TestDelegatingHandler : DelegatingHandler
+        {
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                return await base.SendAsync(request, cancellationToken);
+            }
         }
     }
 }

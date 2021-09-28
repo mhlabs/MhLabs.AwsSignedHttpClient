@@ -18,6 +18,25 @@ namespace MhLabs.AwsSignedHttpClient
         {
             services.AddTransient<AwsSignedHttpMessageHandler>();
             return AddMhHttpClient<TClient, TImplementation, AwsSignedHttpMessageHandler>(services, options);
+
+        }
+        /// <summary>
+        /// AddSignedHttpClientWitHttpClientBuilder
+        /// This method adds a creates a HttpClient with AwsSignedHttpMessageHandler and returns IHttpClientBuilder
+        /// which can be used to configure the client further
+        /// </summary>
+        /// <typeparam name="TClient"></typeparam>
+        /// <typeparam name="TImplementation"></typeparam>
+        /// <param name="services"></param>
+        /// <param name="options"></param>
+        /// <returns>An <see cref="IHttpClientBuilder"/> that can be used to configure the client.</returns>
+        public static IHttpClientBuilder AddSignedHttpClientWitHttpClientBuilder<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null)
+            where TClient : class
+            where TImplementation : class, TClient
+        {
+            services.AddTransient<AwsSignedHttpMessageHandler>();
+            return AddMhHttpClientWitHttpClientBuilder<TClient, TImplementation, AwsSignedHttpMessageHandler>(services, options);
+
         }
 
         public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) 
@@ -26,6 +45,20 @@ namespace MhLabs.AwsSignedHttpClient
         {
             services.AddTransient<BaseHttpMessageHandler>();
             return AddMhHttpClient<TClient, TImplementation, BaseHttpMessageHandler>(services, options);
+        }
+
+        private static IHttpClientBuilder AddMhHttpClientWitHttpClientBuilder<TClient, TImplementation, TMessageHandler>(this IServiceCollection services, HttpOptions options = null)
+            where TClient : class
+            where TImplementation : class, TClient
+            where TMessageHandler : DelegatingHandler
+        {
+            options = options ?? new HttpOptions();
+
+            var builder = CreateHttpBuilder<TClient, TImplementation, TMessageHandler>(services, options);
+
+            ApplyPollyConfiguration<TClient, TMessageHandler>(options, builder);
+
+            return builder;
         }
 
         private static IServiceCollection AddMhHttpClient<TClient, TImplementation, TMessageHandler>(this IServiceCollection services, HttpOptions options = null) 

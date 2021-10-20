@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>7.0.1</Version>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Version>8.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.Core" Version="1.1.0" />
-    <PackageReference Include="AWSSDK.Core" Version="3.3.21.10" />
-    <PackageReference Include="MhLabs.Extensions" Version="1.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.1.1" />
+    <PackageReference Include="Amazon.Lambda.Core" Version="2.0.0" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.3.22" />
+    <PackageReference Include="MhLabs.Extensions" Version="1.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.20" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.20" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="3.1.20" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.20" />
     <PackageReference Include="newtonsoft.json" Version="12.0.3" />
     <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
   </ItemGroup>

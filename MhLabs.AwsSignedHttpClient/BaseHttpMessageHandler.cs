@@ -21,7 +21,11 @@ namespace MhLabs.AwsSignedHttpClient
             if (!request.Headers.Contains(CorrelationHelper.CorrelationIdHeader))
             {
                 request.Headers.Add(CorrelationHelper.CorrelationIdHeader, CorrelationHelper.CorrelationId ?? Guid.NewGuid().ToString());
-                request.Headers.Add("X-Amzn-Trace-Id", Environment.GetEnvironmentVariable("_X_AMZN_TRACE_ID"));
+                
+                var xRayEnvVar = Environment.GetEnvironmentVariable("_X_AMZN_TRACE_ID");
+                if (!string.IsNullOrWhiteSpace(xRayEnvVar))
+                    request.Headers.Add("X-Amzn-Trace-Id", xRayEnvVar);
+                
             }
 
             var timer = new Stopwatch();

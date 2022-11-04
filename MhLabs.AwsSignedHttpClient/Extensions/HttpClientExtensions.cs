@@ -25,6 +25,24 @@ namespace MhLabs.AwsSignedHttpClient
             return executionResult.Data;
         }
 
+        /// <summary>
+        /// Call SendAsync with a custom timeout
+        /// </summary>
+        /// <exception cref="OperationCanceledException">Thrown in case of a timeout</exception>
+        public static async Task<TReturn> SendAsyncTimeout<TReturn>(this HttpClient client,
+            HttpMethod method,
+            string path,
+            int millisecondsTimeout,
+            object postData = null,
+            string contentType = "application/json",
+            CancellationToken cancellationToken = default(CancellationToken)) where TReturn : class
+        {
+            using var cts = new CancellationTokenSource();
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token);
+            cts.CancelAfter(millisecondsTimeout);
+            return await SendAsync<TReturn>(client, method, path, postData, contentType, linkedCts.Token);
+        }
+
         public static async Task<ExecutionResult<TReturn>> ExecuteAsync<TReturn>(this HttpClient client, HttpMethod method, string path, object postData = null,
             string contentType = "application/json", CancellationToken cancellationToken = default(CancellationToken))
             where TReturn : class

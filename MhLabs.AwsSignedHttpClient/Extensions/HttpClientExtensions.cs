@@ -37,9 +37,8 @@ namespace MhLabs.AwsSignedHttpClient
             string contentType = "application/json",
             CancellationToken cancellationToken = default(CancellationToken)) where TReturn : class
         {
-            using var cts = new CancellationTokenSource();
+            using var cts = new CancellationTokenSource(millisecondsTimeout);
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token);
-            cts.CancelAfter(millisecondsTimeout);
             return await SendAsync<TReturn>(client, method, path, postData, contentType, linkedCts.Token);
         }
 

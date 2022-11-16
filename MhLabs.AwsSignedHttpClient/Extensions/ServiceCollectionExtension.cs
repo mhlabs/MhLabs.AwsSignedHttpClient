@@ -5,6 +5,7 @@ using Polly;
 using Polly.Extensions.Http;
 using System.IO;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -12,11 +13,11 @@ namespace MhLabs.AwsSignedHttpClient
     {
         private static readonly Random _jitterer = new Random();
 
-        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) 
+        public static IServiceCollection AddSignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null)
             where TClient : class
             where TImplementation : class, TClient
         {
-            services.AddTransient<AwsSignedHttpMessageHandler>();
+            services.TryAddTransient<AwsSignedHttpMessageHandler>();
             return AddMhHttpClient<TClient, TImplementation, AwsSignedHttpMessageHandler>(services, options);
 
         }
@@ -34,16 +35,16 @@ namespace MhLabs.AwsSignedHttpClient
             where TClient : class
             where TImplementation : class, TClient
         {
-            services.AddTransient<AwsSignedHttpMessageHandler>();
+            services.TryAddTransient<AwsSignedHttpMessageHandler>();
             return AddMhHttpClientWitHttpClientBuilder<TClient, TImplementation, AwsSignedHttpMessageHandler>(services, options);
 
         }
 
-        public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) 
+        public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null)
             where TClient : class
             where TImplementation : class, TClient
         {
-            services.AddTransient<BaseHttpMessageHandler>();
+            services.TryAddTransient<BaseHttpMessageHandler>();
             return AddMhHttpClient<TClient, TImplementation, BaseHttpMessageHandler>(services, options);
         }
 
@@ -61,7 +62,7 @@ namespace MhLabs.AwsSignedHttpClient
             return builder;
         }
 
-        private static IServiceCollection AddMhHttpClient<TClient, TImplementation, TMessageHandler>(this IServiceCollection services, HttpOptions options = null) 
+        private static IServiceCollection AddMhHttpClient<TClient, TImplementation, TMessageHandler>(this IServiceCollection services, HttpOptions options = null)
             where TClient : class
             where TImplementation : class, TClient
             where TMessageHandler : DelegatingHandler
@@ -117,7 +118,7 @@ namespace MhLabs.AwsSignedHttpClient
 
             if (baseUrl == null)
                 throw new BaseUrlMissingException();
-            
+
             return new Uri(baseUrl);
         }
 
@@ -129,11 +130,11 @@ namespace MhLabs.AwsSignedHttpClient
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrInner<IOException>()
-                .CircuitBreakerAsync(3, TimeSpan.FromSeconds(30), 
+                .CircuitBreakerAsync(3, TimeSpan.FromSeconds(30),
                 (o, ts) =>
                 {
                     logger.LogWarning("Circuit breaker - State: {CircuitState}. Event: {CircuitEvent}.", Polly.CircuitBreaker.CircuitState.Open, "onBreak");
-                    logger.LogWarning("Response: {Delay}ms. Reason: {ReasonPhrase}. StatusCode: {StatusCode}. Exception: {Exception}", 
+                    logger.LogWarning("Response: {Delay}ms. Reason: {ReasonPhrase}. StatusCode: {StatusCode}. Exception: {Exception}",
                         ts.TotalMilliseconds, o?.Result?.ReasonPhrase, o?.Result?.StatusCode, o?.Exception?.ToString());
                 },
                 () => logger.LogWarning("Circuit breaker - State: {CircuitState}. Event: {CircuitEvent}.", Polly.CircuitBreaker.CircuitState.Closed, "onReset"),
@@ -151,12 +152,12 @@ namespace MhLabs.AwsSignedHttpClient
                 .WaitAndRetryAsync(3,
                             retryAttempt =>
                             {
-                                return TimeSpan.FromMilliseconds(Math.Pow(5, retryAttempt)) + 
+                                return TimeSpan.FromMilliseconds(Math.Pow(5, retryAttempt)) +
                                        TimeSpan.FromMilliseconds(_jitterer.Next(0, 100));
                             },
                             onRetry: (outcome, timespan, retryAttempt, context) =>
                             {
-                                logger.LogWarning("Delaying for {Delay} ms, then making retry {Retry}. StatusCode: {StatusCode}. Exception: {Exception}", 
+                                logger.LogWarning("Delaying for {Delay} ms, then making retry {Retry}. StatusCode: {StatusCode}. Exception: {Exception}",
                                     timespan.TotalMilliseconds, retryAttempt, outcome?.Result?.ReasonPhrase, outcome?.Result?.StatusCode, outcome?.Exception?.ToString());
                             });
         }

@@ -90,8 +90,14 @@ namespace MhLabs.AwsSignedHttpClient
                 return content as TReturn;
             }
 
-            return JsonConvert.DeserializeObject<TReturn>(content);
-
+            try
+            {
+                return JsonConvert.DeserializeObject<TReturn>(content);
+            }
+            catch (Exception)
+            {
+                return default;
+            }
         }
     }
 }

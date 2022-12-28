@@ -2,10 +2,7 @@ name: publish to nuget
 on:
   push:
     branches:
-      - '*'
-      - '!main'
-      - '!master'
-      - '!develop'
+      - master
 
   workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
 

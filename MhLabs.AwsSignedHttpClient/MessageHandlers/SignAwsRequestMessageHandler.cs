@@ -1,4 +1,4 @@
-﻿namespace MhLabs.AwsSignedHttpClient
+﻿namespace MhLabs.AwsSignedHttpClient.MessageHandlers
 {
     using System;
     using MhLabs.AwsSignedHttpClient.Credentials;
@@ -56,7 +56,7 @@
                 Algorithm = AwsSigningAlgorithm.SIGV4A,
                 SignatureType = AwsSignatureType.HTTP_REQUEST_VIA_HEADERS,
                 SignedBodyHeader = AwsSignedBodyHeaderType.X_AMZ_CONTENT_SHA256,
-                Credentials = new Aws.Crt.Auth.Credentials(credentials.AccessKey, credentials.SecretKey, credentials.Token),
+                Credentials = new Credentials(credentials.AccessKey, credentials.SecretKey, credentials.Token),
             };
 
             var signHttpRequest = new HttpRequest

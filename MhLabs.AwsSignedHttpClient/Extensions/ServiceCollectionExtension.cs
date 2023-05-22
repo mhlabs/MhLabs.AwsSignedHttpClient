@@ -5,6 +5,7 @@ using Polly;
 using Polly.Extensions.Http;
 using System.IO;
 using Microsoft.Extensions.Logging;
+using MhLabs.AwsSignedHttpClient.MessageHandlers;
 
 namespace MhLabs.AwsSignedHttpClient
 {
@@ -37,6 +38,25 @@ namespace MhLabs.AwsSignedHttpClient
             services.AddTransient<AwsSignedHttpMessageHandler>();
             return AddMhHttpClientWitHttpClientBuilder<TClient, TImplementation, AwsSignedHttpMessageHandler>(services, options);
 
+        }
+        /// <summary>
+        /// AddMhHttpClient
+        /// This method adds and creates a HttpClient with only TracingMessageHandler and returns IHttpClientBuilder
+        /// Signing Aws requests will require SignAwsRequestMessageHandler to be added additionally to the client
+        /// SignAwsRequestMessageHandler is already registered in the container and can be added as a message handler
+        /// </summary>
+        /// <typeparam name="TClient"></typeparam>
+        /// <typeparam name="TImplementation"></typeparam>
+        /// <param name="services"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public static IHttpClientBuilder AddMhHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null)
+            where TClient : class
+            where TImplementation : class, TClient
+        {
+            services.AddTransient<SignAwsRequestMessageHandler>();
+            services.AddTransient<TracingMessageHandler>();
+            return AddMhHttpClientWitHttpClientBuilder<TClient, TImplementation, TracingMessageHandler>(services, options);
         }
 
         public static IServiceCollection AddUnsignedHttpClient<TClient, TImplementation>(this IServiceCollection services, HttpOptions options = null) 
